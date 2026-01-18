@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:wahab/model/product.dart';
 import 'package:wahab/model/tools.dart';
 
 class Detail extends StatefulWidget {
-  const Detail({super.key});
-
+  final Product product;
+  const Detail({super.key, required this.product});
   @override
   State<Detail> createState() => _DetailState();
 }
@@ -12,23 +13,18 @@ class _DetailState extends State<Detail> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<String> _images = [
-    'assets/images/bg1.png',
-    'assets/images/bg2.jpg',
-    'assets/images/bg3.jpeg',
-    'assets/images/bg4.jpg',
-  ];
-
   @override
   void initState() {
     super.initState();
-    _startAutoPlay();
+    if (widget.product.imageURL.isNotEmpty) {
+      _startAutoPlay();
+    }
   }
 
   void _startAutoPlay() {
     Future.delayed(const Duration(seconds: 5), () {
-      if (_pageController.hasClients) {
-        if (_currentPage < _images.length - 1) {
+      if (_pageController.hasClients && widget.product.imageURL.isNotEmpty) {
+        if (_currentPage < widget.product.imageURL.length - 1) {
           _pageController.nextPage(
             duration: const Duration(milliseconds: 1000),
             curve: Curves.easeInOut,
@@ -42,27 +38,39 @@ class _DetailState extends State<Detail> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final List<String> images = widget.product.imageURL.isNotEmpty
+        ? widget.product.imageURL
+        : ['assets/images/placeholder.png'];
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          'Detail Page',
+          'Product Details',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.blue[500],
-        elevation: 0,
+        elevation: 0
       ),
       body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Container(
           padding: const EdgeInsets.all(25),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Image Slider
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: 230,
@@ -80,64 +88,76 @@ class _DetailState extends State<Detail> {
                             _currentPage = index;
                           });
                         },
-                        itemCount: _images.length,
+                        itemCount: images.length,
                         itemBuilder: (context, index) {
                           return Image.asset(
-                            _images[index],
+                            images[index],
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: double.infinity,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image_not_supported,
+                                    size: 50,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),
-                      Positioned(
-                        bottom: 10,
-                        left: 0,
-                        right: 0,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(_images.length, (index) {
-                            return Container(
-                              width: 8,
-                              height: 8,
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _currentPage == index
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.5),
-                              ),
-                            );
-                          }),
+                      if (images.length > 1)
+                        Positioned(
+                          bottom: 10,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(images.length, (index) {
+                              return Container(
+                                width: 8,
+                                height: 8,
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _currentPage == index
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.5),
+                                ),
+                              );
+                            }),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+
+              const SizedBox(height: 25),
+              Text(
+                widget.product.title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
                 children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.tag,
-                        color: Colors.blue,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Name:',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                  const Icon(
+                    Icons.confirmation_number,
+                    color: Colors.blue,
+                    size: 20,
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(width: 8),
                   Text(
-                    'Name of the product or tool',
+                    'ID: ${widget.product.id}',
                     style: TextStyle(
-                      fontWeight: FontWeight.w300,
                       fontSize: 16,
                       color: Colors.grey[700],
                     ),
@@ -145,137 +165,168 @@ class _DetailState extends State<Detail> {
                 ],
               ),
               const SizedBox(height: 15),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.widgets,
+                  const Icon(
+                    Icons.category,
+                    color: Colors.blue,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      widget.product.group,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                         color: Colors.blue,
                       ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Type:',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    'Group A',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontSize: 16,
-                      color: Colors.grey[700],
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Description',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(height: 5),
+              SizedBox(
+                child: Text(
+                  widget.product.desc,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                    height: 1.5,
+                  ),
+                ),
               ),
               const SizedBox(height: 15),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.description_outlined,
-                        color: Colors.blue,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Description:',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ],
+              const Text(
+                'Tools & Accessories',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              if (widget.product.tool.isNotEmpty)
+                SizedBox(
+                  child: Wrap(
+                    spacing: 7,
+                    runSpacing: 12,
+                    children: widget.product.tool.map((tool) {
+                      return CardProduct(title: tool);
+                    }).toList(),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer ",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.grey[700],
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'No tools specified',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 15),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.settings,
-                        color: Colors.blue,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Accessories:',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: const Wrap(
-                      runSpacing: 9,
-                      spacing: 9,
-                      children: [
-                        CardProduct(title: 'Item 1'),
-                        CardProduct(title: 'Item 2'),
-                        CardProduct(title: 'Item 3'),
-                        CardProduct(title: 'Item 4'),
-                        CardProduct(title: 'Item 5'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+
+              const SizedBox(height: 10),
             ],
           ),
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        color: Colors.white,
-        child: ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 18),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(7),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, -1),
             ),
-            backgroundColor: Colors.blue,
-            elevation: 0,
-            minimumSize: const Size(double.infinity, 50),
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.update,
-                size: 28,
-                color: Colors.white,
-              ),
-              SizedBox(width: 10),
-              Text(
-                'Update Item',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // Edit functionality
+                  // Navigator.push(context, MaterialPageRoute(
+                  //   builder: (context) => EditProductPage(product: widget.product),
+                  // ));
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                icon: const Icon(Icons.edit, color: Colors.white, size: 22),
+                label: const Text(
+                  'Edit Product',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  // void _showDeleteDialog(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('Delete Product'),
+  //       content: const Text('Are you sure you want to delete this product? This action cannot be undone.'),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.of(context).pop(),
+  //           child: const Text('Cancel'),
+  //         ),
+  //         TextButton(
+  //           onPressed: () {
+  //             Navigator.of(context).pop();
+  //             // Delete logic here
+  //             Navigator.of(context).pop(); // Go back to home
+  //           },
+  //           child: const Text(
+  //             'Delete',
+  //             style: TextStyle(color: Colors.red),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }

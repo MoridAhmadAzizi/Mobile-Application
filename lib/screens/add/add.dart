@@ -12,7 +12,7 @@ class _AddState extends State<Add> {
   // Variables
   final List<String> _tags = [];
   final ImagePicker _picker = ImagePicker();
-  
+
   String _name = '';
   String _selectedGroup = 'Group A';
   String _tagInput = '';
@@ -21,7 +21,7 @@ class _AddState extends State<Add> {
   final List<String> _groups = ['Group A', 'Group B'];
   Future<void> _pickImages() async {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+     const SnackBar(
         content: Text('Image picker would open here'),
         duration: Duration(seconds: 1),
       ),
@@ -48,14 +48,14 @@ class _AddState extends State<Add> {
       _showMessage('Please enter name');
       return;
     }
-    
+
     final data = {
       'name': _name,
       'group': _selectedGroup,
       'tags': _tags,
       'description': _description,
     };
-    
+
     print('Saved Data: $data');
     _showMessage('Item added successfully!');
   }
@@ -82,22 +82,21 @@ class _AddState extends State<Add> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.grey[100],
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            
+
             const SizedBox(height: 32),
-            
+
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     _buildImageCard(),
-                    
                     const SizedBox(height: 24),
                     _buildTextField(
                       label: 'Name',
@@ -105,7 +104,6 @@ class _AddState extends State<Add> {
                       onChanged: (value) => _name = value,
                       hint: 'Enter item name',
                     ),
-                    
                     const SizedBox(height: 20),
                     _buildGroupSelector(),
                     const SizedBox(height: 20),
@@ -123,7 +121,7 @@ class _AddState extends State<Add> {
                 ),
               ),
             ),
-            
+
             // Buttons
             _buildActionButtons(),
           ],
@@ -135,11 +133,11 @@ class _AddState extends State<Add> {
   Widget _buildHeader() {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-         Row(
-          children:[
-             SizedBox(width: 16),
-             Column(
+      children: [
+        Row(
+          children: [
+            SizedBox(width: 16),
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -225,6 +223,7 @@ class _AddState extends State<Add> {
       ),
     );
   }
+
   Widget _buildTextField({
     required String label,
     required IconData icon,
@@ -246,9 +245,9 @@ class _AddState extends State<Add> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(7),
-          ),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(7),
+              border: BoxBorder.all(color: Colors.grey[300]!, width: 2)),
           child: TextField(
             onChanged: onChanged,
             maxLines: maxLines,
@@ -256,9 +255,8 @@ class _AddState extends State<Add> {
               hintText: hint,
               prefixIcon: Icon(icon, color: Colors.blue),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7),
-                borderSide: BorderSide.none,
-              ),
+                  borderRadius: BorderRadius.circular(7),
+                  borderSide: BorderSide.none),
               filled: true,
               fillColor: Colors.white,
               contentPadding: const EdgeInsets.symmetric(
@@ -270,6 +268,7 @@ class _AddState extends State<Add> {
       ],
     );
   }
+
   Widget _buildGroupSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,6 +287,10 @@ class _AddState extends State<Add> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(7),
+            border: Border.all(
+              color: Colors.grey[300]!,
+              width: 2
+            )
           ),
           child: DropdownButton<String>(
             value: _selectedGroup,
@@ -334,7 +337,7 @@ class _AddState extends State<Add> {
           ),
         ),
         const SizedBox(height: 8),
-        
+
         // Input Row
         Row(
           children: [
@@ -343,6 +346,10 @@ class _AddState extends State<Add> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(7),
+                  border: BoxBorder.all(
+                    color: Colors.grey[300]!,
+                    width: 2
+                  )
                 ),
                 child: TextField(
                   onChanged: (value) => _tagInput = value,
@@ -351,9 +358,9 @@ class _AddState extends State<Add> {
                     hintText: 'Enter tag',
                     prefixIcon: const Icon(Icons.tag, color: Colors.blue),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7),
-                      borderSide: BorderSide.none,
-                    ),
+                        borderRadius: BorderRadius.circular(7),
+                      borderSide: BorderSide.none
+                       ),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(
@@ -369,7 +376,6 @@ class _AddState extends State<Add> {
               decoration: BoxDecoration(
                 color: Colors.blue,
                 borderRadius: BorderRadius.circular(7),
-          
               ),
               child: IconButton(
                 onPressed: _addTag,
@@ -378,7 +384,7 @@ class _AddState extends State<Add> {
             ),
           ],
         ),
-        
+
         // Tags List
         if (_tags.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -401,10 +407,9 @@ class _AddState extends State<Add> {
                     Text(
                       _tags[index],
                       style: TextStyle(
-                        color: Colors.blue.shade700,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16
-                      ),
+                          color: Colors.blue.shade700,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16),
                     ),
                     const SizedBox(width: 6),
                     GestureDetector(

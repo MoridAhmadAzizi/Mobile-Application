@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import '../../data/product_data.dart';
+import '../../model/product.dart';
+import '../../screens/detail/detail.dart';
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -9,62 +12,31 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final List<Map<String, String>> _allProducts = [
-    {
-      'image': 'assets/images/bg1.png',
-      'title': 'Product Number one',
-      'group': 'Group A'
-    },
-    {
-      'image': 'assets/images/bg1.png',
-      'title': 'Product Number two',
-      'group': 'Group A'
-    },
-    {
-      'image': 'assets/images/bg1.png',
-      'title': 'Product Number three',
-      'group': 'Group A'
-    },
-    {
-      'image': 'assets/images/bg1.png',
-      'title': 'Product Number four',
-      'group': 'Group A'
-    },
-    {
-      'image': 'assets/images/bg1.png',
-      'title': 'Product Number five',
-      'group': 'Group A'
-    },
-    {
-      'image': 'assets/images/bg1.png',
-      'title': 'Product Number six',
-      'group': 'Group A'
-    },
-    {
-      'image': 'assets/images/bg1.png',
-      'title': 'Product Number seven',
-      'group': 'Group B'
-    },
-    {
-      'image': 'assets/images/bg1.png',
-      'title': 'Product Number eight',
-      'group': 'Group B'
-    },
-    {
-      'image': 'assets/images/bg1.png',
-      'title': 'Product Number nine',
-      'group': 'Group B'
-    },
-  ];
-
-  List<Map<String, String>> _filteredProducts = [];
-
+  List<Product> _allProducts = [];
+  List<Product> _filteredProducts = [];
   String _searchText = '';
 
   @override
   void initState() {
     super.initState();
-    _filteredProducts = _allProducts;
+    _initializeProducts();
+  }
+
+  void _initializeProducts() {
+    try {
+      _allProducts = List<Product>.from(products);
+      _filteredProducts = List<Product>.from(_allProducts);
+      print('Products loaded: ${_allProducts.length} items');
+
+      if (_allProducts.isNotEmpty) {
+        print('First product imageURL: ${_allProducts[0].imageURL}');
+        print('First product imageURL type: ${_allProducts[0].imageURL.runtimeType}');
+      }
+    } catch (e) {
+      print('Error loading products: $e');
+      _allProducts = [];
+      _filteredProducts = [];
+    }
   }
 
   void _searchProducts(String query) {
@@ -72,11 +44,11 @@ class _HomeState extends State<Home> {
       _searchText = query;
 
       if (query.isEmpty) {
-        _filteredProducts = _allProducts;
+        _filteredProducts = List<Product>.from(_allProducts);
       } else {
         _filteredProducts = _allProducts.where((product) {
-          final title = product['title']!.toLowerCase();
-          final group = product['group']!.toLowerCase();
+          final title = product.title.toLowerCase();
+          final group = product.group.toLowerCase();
           final searchQuery = query.toLowerCase();
 
           return title.contains(searchQuery) || group.contains(searchQuery);
@@ -85,34 +57,36 @@ class _HomeState extends State<Home> {
     });
   }
 
-  List<Map<String, String>> _getProductsByTab(int tabIndex) {
+  List<Product> _getProductsByTab(int tabIndex) {
     if (_searchText.isNotEmpty) {
       return _filteredProducts.where((product) {
-        if (tabIndex == 0) return product['group'] == 'Group A';
-        if (tabIndex == 1) return product['group'] == 'Group B';
+        if (tabIndex == 0) return product.group == 'Group A';
+        if (tabIndex == 1) return product.group == 'Group B';
         return true;
       }).toList();
     } else {
       if (tabIndex == 0) {
-        return _allProducts.where((p) => p['group'] == 'Group A').toList();
+        return _allProducts.where((p) => p.group == 'Group A').toList();
       } else if (tabIndex == 1) {
-        return _allProducts.where((p) => p['group'] == 'Group B').toList();
+        return _allProducts.where((p) => p.group == 'Group B').toList();
       } else {
-        return _allProducts; 
+        return List<Product>.from(_allProducts);
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
+        backgroundColor: Colors.grey[100],
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: Colors.blue[500],
-          title: const Text('Application Home', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+          title: const Text('Application Home',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           centerTitle: true,
         ),
         drawer: const NavigationDrawer(),
@@ -173,7 +147,6 @@ class _HomeState extends State<Home> {
                   color: Colors.grey,
                   size: 30.0,
                 ),
-  
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12.0,
                   vertical: 14.0,
@@ -188,7 +161,7 @@ class _HomeState extends State<Home> {
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
+                const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -210,9 +183,8 @@ class _HomeState extends State<Home> {
                 ],
               ),
             ),
-
             TabBar(
-            tabs: [
+              tabs: const [
                 Tab(text: 'Group A'),
                 Tab(text: 'Group B'),
                 Tab(text: 'All'),
@@ -221,10 +193,7 @@ class _HomeState extends State<Home> {
               labelColor: Colors.blue,
               unselectedLabelColor: Colors.blue[300]!,
               indicatorWeight: 4,
-
-
             ),
-            
           ],
         ),
       ),
@@ -269,157 +238,180 @@ class _HomeState extends State<Home> {
     return SingleChildScrollView(
       child: Column(
         children: products.map((product) {
+          String imagePath;
+          if (product.imageURL.isNotEmpty && product.imageURL[0].isNotEmpty) {
+            imagePath = product.imageURL[0];
+          } else {
+            imagePath = 'assets/images/bg1.png';
+          }
+
           return _ImageCard(
-            product['image']!,
-            product['title']!,
-            product['group']!,
+            imagePath: imagePath,
+            title: product.title,
+            description: product.group,
+            product: product,
           );
         }).toList(),
       ),
     );
   }
+
+  Widget _ImageCard({
+    required String imagePath,
+    required String title,
+    required String description,
+    required Product product,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Detail(product: product),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.only(left: 15, right: 15, bottom: 10, top: 10),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(
+            color: Colors.grey[100]!,
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey[300]!,
+              spreadRadius: 1,
+              blurRadius: 2,
+              offset: const Offset(0, 0),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.grey[400]!,
+                      width: 2,
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: Image.asset(
+                      imagePath,
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        description,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const Icon(Icons.arrow_forward_outlined, size: 25),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class NavigationDrawer extends StatefulWidget {
+class NavigationDrawer extends StatelessWidget {
   const NavigationDrawer({super.key});
 
   @override
-  State<NavigationDrawer> createState() => _NavigationDrawerState();
-}
-
-class _NavigationDrawerState extends State<NavigationDrawer> {
-  @override
-  Widget build(BuildContext context) => Drawer(        
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-        ),
-        child:
-        SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              buildHeaderItems(context),
-              buildMenuItems(context)
-            ],
-          ),
-        ),
-      );
-}
-
-Widget buildHeaderItems(BuildContext context) => SafeArea(
-      child: Container(
-        color: Colors.blue,
-        padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top,
-        ),
-        child: const Column(
-          children: [
-            SizedBox(height: 10),
-            CircleAvatar(
-              radius: 52,
-              backgroundImage: AssetImage('assets/images/bg1.png'),
-            ),
-            SizedBox(height: 6),
-            Text(
-              'Morid Ahmad Azizi',
-              style: TextStyle(fontSize: 22, color: Colors.white),
-            ),
-            Text(
-              'moridahmad.876@gmail.com',
-              style: TextStyle(fontSize: 16, color: Colors.white),
-            ),
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    return Drawer(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            buildHeaderItems(context, user),
+            buildMenuItems(context),
           ],
         ),
       ),
     );
+  }
+}
+
+Widget buildHeaderItems(BuildContext context, User? user) => SafeArea(
+  child: Container(
+    color: Colors.blue,
+    padding: EdgeInsets.only(
+      top: MediaQuery.of(context).padding.top,
+    ),
+    child: Column(
+      children: [
+        const SizedBox(height: 10),
+        const CircleAvatar(
+          radius: 52,
+          backgroundImage: AssetImage('assets/images/bg1.png'),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          'Morid Ahmad Azizi',
+          style: TextStyle(fontSize: 22, color: Colors.white),
+        ),
+        Text(
+          '${user?.email!}',
+          style: const TextStyle(fontSize: 16, color: Colors.white),
+        ),
+      ],
+    ),
+  ),
+);
 
 Widget buildMenuItems(BuildContext context) => Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Wrap(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Profile'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Log out', style: TextStyle(color: Colors.red)),
-            onTap: () {},
-          ),
-        ],
+  padding: const EdgeInsets.all(12.0),
+  child: Wrap(
+    children: [
+      ListTile(
+        leading: const Icon(Icons.person),
+        title: const Text('Profile'),
+        onTap: () {},
       ),
-    );
-
-Widget _ImageCard(String imagePath, String title, String description) {
-  return Container(
-    padding: const EdgeInsets.all(10),
-    margin: const EdgeInsets.only(left: 15, right: 15, bottom: 10, top: 10),
-    decoration: BoxDecoration(
-      color: Colors.grey.shade50,
-      borderRadius: BorderRadius.circular(9),
-      border: Border.all(
-        color: Colors.grey[100]!,
-        width: 1,
+      ListTile(
+        leading: const Icon(Icons.logout, color: Colors.red),
+        title: const Text('Log out', style: TextStyle(color: Colors.red)),
+        onTap: signUserout,
       ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey[300]!,
-          spreadRadius: 1,
-          blurRadius: 2,
-          offset: const Offset(0, 0),
-        ),
-      ],
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.grey[400]!,
-                  width: 2,
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(7),
-                child: Image.asset(
-                  imagePath,
-                  width: 70,
-                  height: 70,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            SizedBox(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const Icon(Icons.arrow_forward_outlined, size: 25),
-      ],
-    ),
-  );
+    ],
+  ),
+);
+void signUserout() {
+  FirebaseAuth.instance.signOut();
 }

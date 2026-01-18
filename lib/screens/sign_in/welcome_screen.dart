@@ -4,6 +4,7 @@ import 'package:wahab/screens/sign_in/signup_screen.dart';
 import 'package:wahab/theme/theme.dart';
 import 'package:wahab/widgets/custom_scaffold.dart';
 import 'package:wahab/widgets/welcome_button.dart';
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
@@ -73,3 +74,4 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 }
+
