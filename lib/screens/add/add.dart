@@ -21,7 +21,7 @@ class _AddState extends State<Add> {
   final List<String> _groups = ['Group A', 'Group B'];
   Future<void> _pickImages() async {
     ScaffoldMessenger.of(context).showSnackBar(
-     const SnackBar(
+      const SnackBar(
         content: Text('Image picker would open here'),
         duration: Duration(seconds: 1),
       ),
@@ -74,7 +74,7 @@ class _AddState extends State<Add> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.blue.shade600,
+        backgroundColor: Colors.grey.shade600,
       ),
     );
   }
@@ -184,13 +184,13 @@ class _AddState extends State<Add> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: Colors.grey.shade50,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.cloud_upload_outlined,
                 size: 40,
-                color: Colors.blue,
+                color: Colors.grey,
               ),
             ),
             const SizedBox(height: 16),
@@ -253,7 +253,7 @@ class _AddState extends State<Add> {
             maxLines: maxLines,
             decoration: InputDecoration(
               hintText: hint,
-              prefixIcon: Icon(icon, color: Colors.blue),
+              prefixIcon: Icon(icon, color: Colors.grey),
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7),
                   borderSide: BorderSide.none),
@@ -285,18 +285,14 @@ class _AddState extends State<Add> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(7),
-            border: Border.all(
-              color: Colors.grey[300]!,
-              width: 2
-            )
-          ),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(color: Colors.grey[300]!, width: 2)),
           child: DropdownButton<String>(
             value: _selectedGroup,
             isExpanded: true,
             underline: const SizedBox(),
-            icon: const Icon(Icons.expand_more, color: Colors.blue),
+            icon: const Icon(Icons.expand_more, color: Colors.grey),
             style: const TextStyle(
               fontSize: 16,
               color: Colors.black87,
@@ -344,23 +340,18 @@ class _AddState extends State<Add> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(7),
-                  border: BoxBorder.all(
-                    color: Colors.grey[300]!,
-                    width: 2
-                  )
-                ),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(7),
+                    border: BoxBorder.all(color: Colors.grey[300]!, width: 2)),
                 child: TextField(
                   onChanged: (value) => _tagInput = value,
                   onSubmitted: (_) => _addTag(),
                   decoration: InputDecoration(
                     hintText: 'Enter tag',
-                    prefixIcon: const Icon(Icons.tag, color: Colors.blue),
+                    prefixIcon: const Icon(Icons.tag, color: Colors.grey),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(7),
-                      borderSide: BorderSide.none
-                       ),
+                        borderSide: BorderSide.none),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(
@@ -374,7 +365,7 @@ class _AddState extends State<Add> {
             const SizedBox(width: 12),
             Container(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.grey,
                 borderRadius: BorderRadius.circular(7),
               ),
               child: IconButton(
@@ -398,7 +389,7 @@ class _AddState extends State<Add> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(7),
                 ),
                 child: Row(
@@ -407,7 +398,7 @@ class _AddState extends State<Add> {
                     Text(
                       _tags[index],
                       style: TextStyle(
-                          color: Colors.blue.shade700,
+                          color: Colors.grey.shade700,
                           fontWeight: FontWeight.w500,
                           fontSize: 16),
                     ),
@@ -417,7 +408,7 @@ class _AddState extends State<Add> {
                       child: Icon(
                         Icons.close,
                         size: 16,
-                        color: Colors.blue.shade700,
+                        color: Colors.grey.shade700,
                       ),
                     ),
                   ],
@@ -462,7 +453,7 @@ class _AddState extends State<Add> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(7),
               ),
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.grey,
               elevation: 0,
             ),
             child: const Text(

@@ -18,12 +18,12 @@ class _LoginPageState extends State<LoginPage> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
-
   void signUserIn() async {
     // Show loading dialog
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent user from dismissing by tapping outside
+      barrierDismissible:
+          false, // Prevent user from dismissing by tapping outside
       builder: (context) {
         return const Center(
           child: CircularProgressIndicator(),
@@ -39,7 +39,6 @@ class _LoginPageState extends State<LoginPage> {
 
       // Close loading dialog
       Navigator.pop(context);
-
     } on FirebaseAuthException catch (e) {
       // Close loading dialog first
       Navigator.pop(context);
@@ -141,7 +140,10 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 SizedBox(height: 25),
-                MyButton(onTap: signUserIn, button: 'Sign In',),
+                MyButton(
+                  onTap: signUserIn,
+                  button: 'Sign In',
+                ),
                 SizedBox(height: 50),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 25.0),
@@ -163,20 +165,27 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 ),
-               const SizedBox(height: 50),
-                Row(
+                const SizedBox(height: 50),
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SqureTile(
-                        icon: Logo(
-                          Logos.apple,
-                          size: 45,
-                        ), onTap: () {  },),
-                    const SizedBox(width: 20),
-                    SqureTile(icon: Logo(Logos.google, size: 45), onTap: () => AuthService().signInWithGoogle(),),
+                      icon: Logo(
+                        Logos.apple,
+                        size: 28,
+                      ),
+                      onTap: () {},
+                      text: 'Sign In With your Apple ID',
+                    ),
+                    const SizedBox(height: 10),
+                    SqureTile(
+                      icon: Logo(Logos.google, size: 28),
+                      onTap: () => AuthService().signInWithGoogle(),
+                      text: 'Sign In With your Google Account',
+                    ),
                   ],
                 ),
-              const   SizedBox(height: 50),
+                const SizedBox(height: 50),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -190,7 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: const Text(
                         'Register Now',
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: Colors.grey,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

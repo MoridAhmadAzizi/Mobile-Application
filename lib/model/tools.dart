@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class CardProduct extends StatelessWidget {
-
   final String title;
 
   const CardProduct({
@@ -15,7 +14,7 @@ class CardProduct extends StatelessWidget {
       constraints: BoxConstraints(minWidth: 60, maxWidth: 200),
       padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
       decoration: BoxDecoration(
-          color: Colors.blue.shade50, borderRadius: BorderRadius.circular(7)),
+          color: Colors.grey.shade50, borderRadius: BorderRadius.circular(7)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -23,7 +22,7 @@ class CardProduct extends StatelessWidget {
             child: Text(
               title,
               style: TextStyle(
-                  color: Colors.blue.shade700,
+                  color: Colors.grey.shade700,
                   fontWeight: FontWeight.w500,
                   fontSize: 16),
               overflow: TextOverflow.ellipsis,

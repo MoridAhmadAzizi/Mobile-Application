@@ -183,7 +183,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           Expanded(
                             child: Divider(
                               thickness: 0.7,
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.black.withOpacity(0.5),
                             ),
                           ),
                           const Padding(
@@ -201,7 +201,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           Expanded(
                             child: Divider(
                               thickness: 0.7,
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.black.withOpacity(0.5),
                             ),
                           ),
                         ],

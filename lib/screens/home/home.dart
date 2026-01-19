@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../data/product_data.dart';
 import '../../model/product.dart';
 import '../../screens/detail/detail.dart';
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -30,7 +31,8 @@ class _HomeState extends State<Home> {
 
       if (_allProducts.isNotEmpty) {
         print('First product imageURL: ${_allProducts[0].imageURL}');
-        print('First product imageURL type: ${_allProducts[0].imageURL.runtimeType}');
+        print(
+            'First product imageURL type: ${_allProducts[0].imageURL.runtimeType}');
       }
     } catch (e) {
       print('Error loading products: $e');
@@ -75,7 +77,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -84,9 +85,10 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.grey[100],
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white),
-          backgroundColor: Colors.blue[500],
+          backgroundColor: Colors.black87,
           title: const Text('Application Home',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           centerTitle: true,
         ),
         drawer: const NavigationDrawer(),
@@ -95,10 +97,10 @@ class _HomeState extends State<Home> {
             Container(
               margin: const EdgeInsets.only(top: 20.0, left: 15.0, right: 15.0),
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 228, 243, 255),
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(10.0),
                 border: BoxBorder.all(
-                  color: Colors.blue[100]!,
+                  color: Colors.grey[800]!,
                   width: 1,
                 ),
                 boxShadow: [
@@ -110,7 +112,7 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(15.0),
                 child: Center(
                   child: Text(
@@ -118,7 +120,7 @@ class _HomeState extends State<Home> {
                     style: TextStyle(
                         fontSize: 16,
                         decoration: TextDecoration.none,
-                        color: Colors.black54,
+                        color: Colors.grey[700],
                         fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -158,10 +160,10 @@ class _HomeState extends State<Home> {
             ElevatedButton.icon(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor: Colors.black87,
                 foregroundColor: Colors.white,
                 padding:
-                const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
+                    const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -183,16 +185,29 @@ class _HomeState extends State<Home> {
                 ],
               ),
             ),
-            TabBar(
-              tabs: const [
-                Tab(text: 'Group A'),
-                Tab(text: 'Group B'),
-                Tab(text: 'All'),
-              ],
-              indicatorColor: Colors.blue,
-              labelColor: Colors.blue,
-              unselectedLabelColor: Colors.blue[300]!,
-              indicatorWeight: 4,
+            Container(
+              margin: EdgeInsets.all(2),
+              height: kToolbarHeight - 8.0,
+              decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(8.0)),
+              child: TabBar(
+                tabs: const [
+                  Tab(
+                    text: 'Group A',
+                  ),
+                  Tab(text: 'Group B'),
+                  Tab(text: 'All'),
+                ],
+                labelColor: Colors.white,
+                indicatorColor: Colors.grey,
+                labelStyle: TextStyle(fontSize: 16),
+                unselectedLabelColor: Colors.grey,
+                indicator: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    color: Colors.black87),
+                indicatorSize: TabBarIndicatorSize.tab,
+              ),
             ),
           ],
         ),
@@ -369,49 +384,49 @@ class NavigationDrawer extends StatelessWidget {
 }
 
 Widget buildHeaderItems(BuildContext context, User? user) => SafeArea(
-  child: Container(
-    color: Colors.blue,
-    padding: EdgeInsets.only(
-      top: MediaQuery.of(context).padding.top,
-    ),
-    child: Column(
-      children: [
-        const SizedBox(height: 10),
-        const CircleAvatar(
-          radius: 52,
-          backgroundImage: AssetImage('assets/images/bg1.png'),
+      child: Container(
+        color: Colors.grey,
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top,
         ),
-        const SizedBox(height: 6),
-        const Text(
-          'Morid Ahmad Azizi',
-          style: TextStyle(fontSize: 22, color: Colors.white),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            const CircleAvatar(
+              radius: 52,
+              backgroundImage: AssetImage('assets/images/bg1.png'),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Morid Ahmad Azizi',
+              style: TextStyle(fontSize: 22, color: Colors.white),
+            ),
+            Text(
+              '${user?.email!}',
+              style: const TextStyle(fontSize: 16, color: Colors.white),
+            ),
+          ],
         ),
-        Text(
-          '${user?.email!}',
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ),
-      ],
-    ),
-  ),
-);
+      ),
+    );
 
 Widget buildMenuItems(BuildContext context) => Padding(
-  padding: const EdgeInsets.all(12.0),
-  child: Wrap(
-    children: [
-      ListTile(
-        leading: const Icon(Icons.person),
-        title: const Text('Profile'),
-        onTap: () {},
+      padding: const EdgeInsets.all(12.0),
+      child: Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Profile'),
+            onTap: () {},
+          ),
+          const ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text('Log out', style: TextStyle(color: Colors.red)),
+            onTap: signUserout,
+          ),
+        ],
       ),
-      ListTile(
-        leading: const Icon(Icons.logout, color: Colors.red),
-        title: const Text('Log out', style: TextStyle(color: Colors.red)),
-        onTap: signUserout,
-      ),
-    ],
-  ),
-);
+    );
 void signUserout() {
   FirebaseAuth.instance.signOut();
 }

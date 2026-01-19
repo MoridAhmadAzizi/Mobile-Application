@@ -6,20 +6,37 @@ import 'package:icons_plus/icons_plus.dart';
 class SqureTile extends StatelessWidget {
   final Logo icon;
   final Function()? onTap;
-  const SqureTile({super.key, required this.icon, required this.onTap});
+  final String text;
+  const SqureTile(
+      {super.key, required this.icon, required this.onTap, required this.text});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(20),
+        margin: EdgeInsets.only(left: 20, right: 20),
+        padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.white),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(7),
           color: Colors.grey[100],
         ),
-        child: icon,
+        child: Row(
+          children: [
+            icon,
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              text,
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w300,
+                  color: Colors.grey[800]),
+            ),
+          ],
+        ),
       ),
     );
   }

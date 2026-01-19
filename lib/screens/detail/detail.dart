@@ -52,17 +52,16 @@ class _DetailState extends State<Detail> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Product Details',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+          centerTitle: true,
+          title: const Text(
+            'Product Details',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        backgroundColor: Colors.blue[500],
-        elevation: 0
-      ),
+          backgroundColor: Colors.grey[500],
+          elevation: 0),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Container(
@@ -121,7 +120,8 @@ class _DetailState extends State<Detail> {
                               return Container(
                                 width: 8,
                                 height: 8,
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 4),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: _currentPage == index
@@ -143,7 +143,7 @@ class _DetailState extends State<Detail> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: Colors.grey,
                 ),
               ),
               const SizedBox(height: 10),
@@ -151,7 +151,7 @@ class _DetailState extends State<Detail> {
                 children: [
                   const Icon(
                     Icons.confirmation_number,
-                    color: Colors.blue,
+                    color: Colors.grey,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -169,14 +169,15 @@ class _DetailState extends State<Detail> {
                 children: [
                   const Icon(
                     Icons.category,
-                    color: Colors.blue,
+                    color: Colors.grey,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.blue[50],
+                      color: Colors.grey[50],
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -184,7 +185,7 @@ class _DetailState extends State<Detail> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.blue,
+                        color: Colors.grey,
                       ),
                     ),
                   ),
@@ -196,7 +197,7 @@ class _DetailState extends State<Detail> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: Colors.grey,
                 ),
               ),
               const SizedBox(height: 5),
@@ -216,7 +217,7 @@ class _DetailState extends State<Detail> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: Colors.grey,
                 ),
               ),
 
@@ -281,7 +282,7 @@ class _DetailState extends State<Detail> {
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

@@ -19,13 +19,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-
-
   void signUserUp() async {
     // Show loading dialog
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent user from dismissing by tapping outside
+      barrierDismissible:
+          false, // Prevent user from dismissing by tapping outside
       builder: (context) {
         return const Center(
           child: CircularProgressIndicator(),
@@ -34,18 +33,17 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     try {
-  if(passwordController.text == confirmPasswordController.text){
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: usernameController.text.trim(),
-      password: passwordController.text.trim(),
-    );
-  }else{
-    showErrorMassage("passwords don't matach!");
-  }
+      if (passwordController.text == confirmPasswordController.text) {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: usernameController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+      } else {
+        showErrorMassage("passwords don't matach!");
+      }
 
       // Close loading dialog
       Navigator.pop(context);
-
     } on FirebaseAuthException catch (e) {
       // Close loading dialog first
       Navigator.pop(context);
@@ -141,7 +139,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 SizedBox(height: 10),
                 SizedBox(height: 25),
-                MyButton(onTap: signUserUp, button: 'Sign up',),
+                MyButton(
+                  onTap: signUserUp,
+                  button: 'Sign up',
+                ),
                 SizedBox(height: 50),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 25.0),
@@ -163,20 +164,27 @@ class _RegisterPageState extends State<RegisterPage> {
                     ],
                   ),
                 ),
-             const   SizedBox(height: 50),
-                Row(
+                const SizedBox(height: 50),
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SqureTile(
-                        icon: Logo(
-                          Logos.apple,
-                          size: 45,
-                        ), onTap: () => AuthService().signInWithGoogle(),),
-                  const  SizedBox(width: 20),
-                    SqureTile(icon: Logo(Logos.google, size: 45), onTap: () {  },),
+                      icon: Logo(
+                        Logos.apple,
+                        size: 28,
+                      ),
+                      onTap: () => AuthService().signInWithGoogle(),
+                      text: 'Sign Up with your Apple ID',
+                    ),
+                    const SizedBox(height: 10),
+                    SqureTile(
+                      icon: Logo(Logos.google, size: 28),
+                      onTap: () {},
+                      text: 'Sign Up with your Google Account',
+                    ),
                   ],
                 ),
-               const SizedBox(height: 50),
+                const SizedBox(height: 50),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -190,7 +198,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: const Text(
                         'Login now',
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: Colors.grey,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

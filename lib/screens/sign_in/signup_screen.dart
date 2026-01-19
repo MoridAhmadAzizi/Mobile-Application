@@ -213,7 +213,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Expanded(
                             child: Divider(
                               thickness: 0.7,
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.black.withOpacity(0.5),
                             ),
                           ),
                           const Padding(
@@ -231,7 +231,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Expanded(
                             child: Divider(
                               thickness: 0.7,
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.black.withOpacity(0.5),
                             ),
                           ),
                         ],
@@ -239,7 +239,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(
                         height: 30.0,
                       ),
-                      // sign up social media logo
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
