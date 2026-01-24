@@ -152,7 +152,7 @@ class _DetailState extends State<Detail> {
                                   shape: BoxShape.circle,
                                   color: _currentPage == index
                                       ? Colors.white
-                                      : Colors.white.withOpacity(0.5),
+                                      : Colors.white.withAlpha(70),
                                 ),
                               );
                             }),
@@ -290,7 +290,7 @@ class _DetailState extends State<Detail> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
+              color: Colors.grey.withAlpha(80),
               blurRadius: 10,
               offset: const Offset(0, -1),
             ),
@@ -311,7 +311,9 @@ class _DetailState extends State<Detail> {
                         // If not found, keep the current
                       }
                     });
+                    if(mounted){
                     context.pop('updated_from_detail');
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(

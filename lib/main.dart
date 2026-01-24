@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/route_manager.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wahab/screens/home/home.dart';
@@ -36,10 +35,7 @@ class MyApp extends StatelessWidget {
       child: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          print(
-              'Auth state: ${snapshot.connectionState}, hasData: ${snapshot.hasData}, user: ${snapshot.data?.email}');
           if (snapshot.hasError) {
-            print('Auth error: ${snapshot.error}');
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const MaterialApp(

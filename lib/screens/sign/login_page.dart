@@ -8,7 +8,7 @@ import 'package:wahab/screens/sign/squre_tile.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
-const LoginPage({super.key, required this.onTap});
+  const LoginPage({super.key, required this.onTap});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -21,8 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   void signUserIn() async {
     showDialog(
       context: context,
-      barrierDismissible:
-          false, 
+      barrierDismissible: false,
       builder: (context) {
         return const Center(
           child: CircularProgressIndicator(),
@@ -36,11 +35,14 @@ class _LoginPageState extends State<LoginPage> {
         password: passwordController.text.trim(),
       );
 
+      if (mounted) {
         Navigator.pop(context);
-    
+      }
     } on FirebaseAuthException catch (e) {
+      if (mounted) {
         Navigator.pop(context);
-  
+      }
+
       String errorMessage;
 
       switch (e.code) {
@@ -65,8 +67,9 @@ class _LoginPageState extends State<LoginPage> {
 
       showErrorMassage(errorMessage);
     } catch (e) {
-      // Close loading dialog
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
       // Show generic error
       showErrorMassage('ops:something happended:$e');
     }
@@ -84,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             content: Text(
               message,
-              style:const TextStyle(color: Colors.white, fontSize: 20),
+              style: const TextStyle(color: Colors.white, fontSize: 20),
               textAlign: TextAlign.center,
             ),
           ),
@@ -103,14 +106,14 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-               const SizedBox(height: 50),
-               const Icon(Icons.lock, size: 100),
+                const SizedBox(height: 50),
+                const Icon(Icons.lock, size: 100),
                 const SizedBox(height: 50),
                 Text(
                   'Welcome Back you have been missed',
                   style: TextStyle(color: Colors.grey[700], fontSize: 16),
                 ),
-              const  SizedBox(height: 25),
+                const SizedBox(height: 25),
                 MyTextField(
                   obsucreText: false,
                   hintText: 'Enter your username',
@@ -122,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                   hintText: 'Enter your password',
                   controller: passwordController,
                 ),
-               const SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
@@ -135,21 +138,21 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 ),
-               const SizedBox(height: 25),
+                const SizedBox(height: 25),
                 MyButton(
                   onTap: signUserIn,
                   button: 'Sign In',
                 ),
-              const  SizedBox(height: 50),
+                const SizedBox(height: 50),
                 Padding(
-                  padding:const EdgeInsets.symmetric(horizontal: 25.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     children: [
                       Expanded(
                         child: Divider(thickness: 0.5, color: Colors.grey[400]),
                       ),
                       Padding(
-                        padding:const EdgeInsets.symmetric(horizontal: 10.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Text(
                           'Or Continue with',
                           style: TextStyle(color: Colors.grey[700]),
