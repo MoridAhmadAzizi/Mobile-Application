@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:wahab/data/product_data.dart';
 import 'package:wahab/model/product.dart';
 
 class ProductProvider with ChangeNotifier {

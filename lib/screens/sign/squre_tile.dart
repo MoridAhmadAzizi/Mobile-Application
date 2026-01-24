@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
@@ -15,8 +13,8 @@ class SqureTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(left: 20, right: 20),
-        padding: EdgeInsets.all(10),
+        margin: const EdgeInsets.only(left: 20, right: 20),
+        padding:const  EdgeInsets.all(10),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.white),
           borderRadius: BorderRadius.circular(7),
@@ -25,7 +23,7 @@ class SqureTile extends StatelessWidget {
         child: Row(
           children: [
             icon,
-            SizedBox(
+           const SizedBox(
               width: 10,
             ),
             Text(

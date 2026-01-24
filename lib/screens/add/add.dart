@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:wahab/data/product_data.dart';
 import 'dart:io';
 
+import 'package:wahab/services/product_repo.dart';
+
 class Add extends StatefulWidget {
   final Product? initialProduct;
   const Add({super.key, this.initialProduct});
@@ -53,7 +55,7 @@ class _AddState extends State<Add> {
     });
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     _name = _nameController.text.trim();
     _description = _descriptionController.text.trim();
     if (_name.isEmpty) {
@@ -79,6 +81,10 @@ class _AddState extends State<Add> {
       imageURL:
           _imagePaths.isNotEmpty ? _imagePaths : ['assets/images/bg1.png'],
     );
+    await ProductRepo.instance.addproduct(newProduct);
+    if (mounted) {
+      context.pop('added');
+    }
 
     if (widget.initialProduct != null) {
       final idx = products.indexWhere((p) => p.id == id);
@@ -90,8 +96,9 @@ class _AddState extends State<Add> {
       products.add(newProduct);
       _showMessage('Item added successfully!');
     }
-
-    context.pop(widget.initialProduct != null ? 'updated' : 'added');
+    if (mounted) {
+      context.pop(widget.initialProduct != null ? 'updated' : 'added');
+    }
   }
 
   void _resetForm() {
@@ -123,9 +130,7 @@ class _AddState extends State<Add> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-
             const SizedBox(height: 32),
-
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -529,7 +534,10 @@ class _AddState extends State<Add> {
         const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
-            onPressed: _saveForm,
+            onPressed: () {
+              _resetForm;
+              _saveForm;
+            },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 18),
               shape: RoundedRectangleBorder(

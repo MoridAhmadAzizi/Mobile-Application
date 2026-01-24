@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/route_manager.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wahab/screens/home/home.dart';
@@ -9,6 +11,7 @@ import 'package:wahab/screens/sign/login_or_register.dart';
 import 'package:wahab/screens/update/update.dart';
 import 'package:wahab/services/product_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:wahab/services/product_repo.dart';
 import 'firebase_options.dart';
 import 'package:wahab/model/product.dart';
 
@@ -17,6 +20,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  Get.put(ProductRepo());
   runApp(const MyApp());
 }
 

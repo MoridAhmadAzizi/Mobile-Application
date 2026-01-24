@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/product_data.dart';
 import '../../model/product.dart';
-import '../../screens/detail/detail.dart';
 import 'dart:io';
 
 class Home extends StatefulWidget {
@@ -29,15 +28,10 @@ class _HomeState extends State<Home> {
     try {
       _allProducts = products;
       _filteredProducts = List<Product>.from(_allProducts);
-      print('Products loaded: ${_allProducts.length} items');
 
       if (_allProducts.isNotEmpty) {
-        print('First product imageURL: ${_allProducts[0].imageURL}');
-        print(
-            'First product imageURL type: ${_allProducts[0].imageURL.runtimeType}');
       }
     } catch (e) {
-      print('Error loading products: $e');
       _allProducts = [];
       _filteredProducts = [];
     }
@@ -115,7 +109,7 @@ class _HomeState extends State<Home> {
                 ],
               ),
               child: Padding(
-                padding: EdgeInsets.all(15.0),
+                padding:const EdgeInsets.all(15.0),
                 child: Center(
                   child: Text(
                     "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy,",
@@ -193,7 +187,7 @@ class _HomeState extends State<Home> {
               ),
             ),
             Container(
-              margin: EdgeInsets.all(2),
+              margin:const EdgeInsets.all(2),
               height: kToolbarHeight - 8.0,
               decoration: BoxDecoration(
                   color: Colors.grey.shade200,
@@ -208,7 +202,7 @@ class _HomeState extends State<Home> {
                 ],
                 labelColor: Colors.white,
                 indicatorColor: Colors.grey,
-                labelStyle: TextStyle(fontSize: 16),
+                labelStyle:const TextStyle(fontSize: 16),
                 unselectedLabelColor: Colors.grey,
                 indicator: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
@@ -268,7 +262,7 @@ class _HomeState extends State<Home> {
           }
           bool isAsset = imagePath.startsWith('assets/');
 
-          return _ImageCard(
+          return _imageCard(
             imagePath: imagePath,
             isAsset: isAsset,
             title: product.title,
@@ -280,7 +274,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _ImageCard({
+  Widget _imageCard({
     required String imagePath,
     required bool isAsset,
     required String title,
@@ -435,8 +429,8 @@ Widget buildMenuItems(BuildContext context) => Padding(
             onTap: () {},
           ),
           const ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Log out', style: TextStyle(color: Colors.red)),
+            leading: Icon(Icons.logout, color: Colors.red),
+            title: Text('Log out', style: TextStyle(color: Colors.red)),
             onTap: signUserout,
           ),
         ],
@@ -445,3 +439,4 @@ Widget buildMenuItems(BuildContext context) => Padding(
 void signUserout() {
   FirebaseAuth.instance.signOut();
 }
+
