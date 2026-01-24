@@ -2,9 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../data/product_data.dart';
-import '../../model/product.dart';
+import 'package:wahab/services/product_repo.dart';
 import 'dart:io';
+import '../../model/product.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -14,62 +14,34 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Product> _allProducts = [];
-  List<Product> _filteredProducts = [];
   String _searchText = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeProducts();
-  }
-
-  void _initializeProducts() {
-    try {
-      _allProducts = products;
-      _filteredProducts = List<Product>.from(_allProducts);
-
-      if (_allProducts.isNotEmpty) {
-      }
-    } catch (e) {
-      _allProducts = [];
-      _filteredProducts = [];
-    }
-  }
 
   void _searchProducts(String query) {
     setState(() {
-      _searchText = query;
-
-      if (query.isEmpty) {
-        _filteredProducts = List<Product>.from(_allProducts);
-      } else {
-        _filteredProducts = _allProducts.where((product) {
-          final title = product.title.toLowerCase();
-          final group = product.group.toLowerCase();
-          final searchQuery = query.toLowerCase();
-
-          return title.contains(searchQuery) || group.contains(searchQuery);
-        }).toList();
-      }
+      _searchText = query.trim();
     });
   }
 
-  List<Product> _getProductsByTab(int tabIndex) {
-    if (_searchText.isNotEmpty) {
-      return _filteredProducts.where((product) {
-        if (tabIndex == 0) return product.group == 'Group A';
-        if (tabIndex == 1) return product.group == 'Group B';
-        return true;
-      }).toList();
+  List<Product> _applySearch(List<Product> list) {
+    if (_searchText.isEmpty) return list;
+
+    final q = _searchText.toLowerCase();
+    return list.where((product) {
+      final title = product.title.toLowerCase();
+      final group = product.group.toLowerCase();
+      return title.contains(q) || group.contains(q);
+    }).toList();
+  }
+
+  List<Product> _getProductsByTab(List<Product> list, int tabIndex) {
+    final searched = _applySearch(list);
+
+    if (tabIndex == 0) {
+      return searched.where((p) => p.group == 'Group A').toList();
+    } else if (tabIndex == 1) {
+      return searched.where((p) => p.group == 'Group B').toList();
     } else {
-      if (tabIndex == 0) {
-        return _allProducts.where((p) => p.group == 'Group A').toList();
-      } else if (tabIndex == 1) {
-        return _allProducts.where((p) => p.group == 'Group B').toList();
-      } else {
-        return List<Product>.from(_allProducts);
-      }
+      return searched;
     }
   }
 
@@ -82,9 +54,10 @@ class _HomeState extends State<Home> {
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: Colors.black87,
-          title: const Text('Application Home',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: const Text(
+            'Application Home',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           centerTitle: true,
         ),
         drawer: const NavigationDrawer(),
@@ -95,7 +68,7 @@ class _HomeState extends State<Home> {
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(10.0),
-                border: BoxBorder.all(
+                border: Border.all(
                   color: Colors.grey[800]!,
                   width: 1,
                 ),
@@ -109,20 +82,23 @@ class _HomeState extends State<Home> {
                 ],
               ),
               child: Padding(
-                padding:const EdgeInsets.all(15.0),
+                padding: const EdgeInsets.all(15.0),
                 child: Center(
                   child: Text(
                     "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy,",
                     style: TextStyle(
-                        fontSize: 16,
-                        decoration: TextDecoration.none,
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w600),
+                      fontSize: 16,
+                      decoration: TextDecoration.none,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
             ),
+
             const SizedBox(height: 10),
+
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: CupertinoSearchTextField(
@@ -153,9 +129,11 @@ class _HomeState extends State<Home> {
                 autocorrect: true,
               ),
             ),
+
             ElevatedButton.icon(
               onPressed: () async {
                 final result = await context.push('/add');
+                // چون Stream داریم، حتی بدون setState هم آپدیت میشه
                 if (result == 'added' || result == 'updated') {
                   setState(() {});
                 }
@@ -163,8 +141,7 @@ class _HomeState extends State<Home> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black87,
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -176,37 +153,54 @@ class _HomeState extends State<Home> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
+
             const SizedBox(height: 20),
             Expanded(
-              child: TabBarView(
-                children: [
-                  _buildTabContent(0),
-                  _buildTabContent(1),
-                  _buildTabContent(2),
-                ],
+              child: StreamBuilder<List<Product>>(
+                stream: ProductRepo.instance.fetchproducts(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(child: Text("Error: ${snapshot.error}"));
+                  }
+
+                  final allProducts = snapshot.data ?? [];
+
+                  return TabBarView(
+                    children: [
+                      _buildTabContent(0, allProducts),
+                      _buildTabContent(1, allProducts),
+                      _buildTabContent(2, allProducts),
+                    ],
+                  );
+                },
               ),
             ),
+
             Container(
-              margin:const EdgeInsets.all(2),
+              margin: const EdgeInsets.all(2),
               height: kToolbarHeight - 8.0,
               decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(8.0)),
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
               child: TabBar(
                 tabs: const [
-                  Tab(
-                    text: 'Group A',
-                  ),
+                  Tab(text: 'Group A'),
                   Tab(text: 'Group B'),
                   Tab(text: 'All'),
                 ],
                 labelColor: Colors.white,
                 indicatorColor: Colors.grey,
-                labelStyle:const TextStyle(fontSize: 16),
+                labelStyle: const TextStyle(fontSize: 16),
                 unselectedLabelColor: Colors.grey,
                 indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    color: Colors.black87),
+                  borderRadius: BorderRadius.circular(8.0),
+                  color: Colors.black87,
+                ),
                 indicatorSize: TabBarIndicatorSize.tab,
               ),
             ),
@@ -216,8 +210,9 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildTabContent(int tabIndex) {
-    final products = _getProductsByTab(tabIndex);
+  // ✅ این تابع تغییر کرد: لیست را ورودی می‌گیرد
+  Widget _buildTabContent(int tabIndex, List<Product> allProducts) {
+    final products = _getProductsByTab(allProducts, tabIndex);
 
     if (_searchText.isNotEmpty && products.isEmpty) {
       return Center(
@@ -251,6 +246,15 @@ class _HomeState extends State<Home> {
       );
     }
 
+    if (products.isEmpty) {
+      return const Center(
+        child: Text(
+          "No products found",
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       child: Column(
         children: products.map((product) {
@@ -260,6 +264,7 @@ class _HomeState extends State<Home> {
           } else {
             imagePath = 'assets/images/bg1.png';
           }
+
           bool isAsset = imagePath.startsWith('assets/');
 
           return _imageCard(
@@ -411,7 +416,7 @@ Widget buildHeaderItems(BuildContext context, User? user) => SafeArea(
               style: TextStyle(fontSize: 22, color: Colors.white),
             ),
             Text(
-              '${user?.email!}',
+              '${user?.email ?? ""}',
               style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
           ],
@@ -436,7 +441,7 @@ Widget buildMenuItems(BuildContext context) => Padding(
         ],
       ),
     );
+
 void signUserout() {
   FirebaseAuth.instance.signOut();
 }
-

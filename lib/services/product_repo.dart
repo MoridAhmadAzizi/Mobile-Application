@@ -24,21 +24,11 @@ class ProductRepo extends GetxController {
     }
   }
 
-  // Future<Product> getProductDetails(String title) async {
-  //   final snapshot = await _db.collection("products").where("title").get();
-  //   final productData =
-  //       snapshot.docs.map((e) => Product.fromSnapshot(e)).single; 
-  //   return productData;
-  // }
-
-  // for getting single item.
-
-  Future<List<Product>> allProduct() async {
-    final snapshot = await _db.collection("products").get();
-    final productData =
-        snapshot.docs.map((e) => Product.fromSnapshot(e)).toList(); 
-    return productData;
+  Stream<List<Product>> fetchproducts() {
+    return _db.collection("products").snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Product.fromJson(doc.data());
+      }).toList();
+    });
   }
-
 }
-

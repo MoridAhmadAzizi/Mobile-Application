@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class Product {
   final String id;
   final String title;
@@ -48,15 +46,13 @@ class Product {
     };
   }
 
-  factory Product.fromSnapshot(
-      DocumentSnapshot<Map<String, dynamic>> document) {
-    final data = document.data()!;
+  factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-        id: document.id,
-        title: data["title"],
-        group: data["group"],
-        desc: data["desc"],
-        tool: data["tool"],
-        imageURL: data["imageURL"]);
+        id: (json["id"] ?? "").toString(),
+        title: json["title"] ?? "",
+        group: json["group"] ?? "",
+        desc: json["desc"] ?? "",
+        tool: List<String>.from(json["tool"] ?? []),
+        imageURL: List<String>.from(json["imageURL"] ?? []));
   }
 }

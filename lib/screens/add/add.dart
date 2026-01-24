@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wahab/model/product.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:wahab/data/product_data.dart';
 import 'dart:io';
 
 import 'package:wahab/services/product_repo.dart';
@@ -20,16 +19,16 @@ class _AddState extends State<Add> {
   final ImagePicker _picker = ImagePicker();
   List<String> _imagePaths = [];
 
-  String _name = '';
   String _selectedGroup = 'Group A';
   String _tagInput = '';
-  String _description = '';
-  String _initialId = '';
 
   final List<String> _groups = ['Group A', 'Group B'];
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
+
+  bool _isSaving = false;
+
   Future<void> _pickImages() async {
     final List<XFile> images = await _picker.pickMultiImage();
     if (images.isNotEmpty) {
@@ -44,7 +43,7 @@ class _AddState extends State<Add> {
       setState(() {
         _tags.add(_tagInput.trim());
         _tagInput = '';
-        _tagController.text = '';
+        _tagController.clear();
       });
     }
   }
@@ -55,69 +54,92 @@ class _AddState extends State<Add> {
     });
   }
 
-  Future<void> _saveForm() async {
-    _name = _nameController.text.trim();
-    _description = _descriptionController.text.trim();
-    if (_name.isEmpty) {
-      _showMessage('Please enter name');
-      return;
-    }
-    final id = _initialId.isNotEmpty
-        ? _initialId
-        : (() {
-            int maxId = products.isNotEmpty
-                ? products
-                    .map((p) => int.tryParse(p.id) ?? 0)
-                    .reduce((a, b) => a > b ? a : b)
-                : 0;
-            return (maxId + 1).toString();
-          })();
-    final newProduct = Product(
-      id: id,
-      title: _name,
-      group: _selectedGroup,
-      desc: _description,
-      tool: List<String>.from(_tags),
-      imageURL:
-          _imagePaths.isNotEmpty ? _imagePaths : ['assets/images/bg1.png'],
+  void _showMessage(String message, {bool success = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: success ? Colors.green.shade600 : Colors.red.shade600,
+      ),
     );
-    await ProductRepo.instance.addproduct(newProduct);
-    if (mounted) {
-      context.pop('added');
-    }
-
-    if (widget.initialProduct != null) {
-      final idx = products.indexWhere((p) => p.id == id);
-      if (idx != -1) {
-        products[idx] = newProduct;
-      }
-      _showMessage('Item updated successfully!');
-    } else {
-      products.add(newProduct);
-      _showMessage('Item added successfully!');
-    }
-    if (mounted) {
-      context.pop(widget.initialProduct != null ? 'updated' : 'added');
-    }
   }
 
   void _resetForm() {
     setState(() {
-      _name = '';
       _selectedGroup = 'Group A';
       _tags.clear();
       _tagInput = '';
-      _description = '';
+      _imagePaths.clear();
+      _nameController.clear();
+      _descriptionController.clear();
+      _tagController.clear();
     });
   }
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.grey.shade600,
-      ),
-    );
+  Future<void> _saveForm() async {
+    if (_isSaving) return;
+
+    final name = _nameController.text.trim();
+    final desc = _descriptionController.text.trim();
+
+    if (name.isEmpty) {
+      _showMessage('Please enter name', success: false);
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      final newProduct = Product(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: name,
+        group: _selectedGroup,
+        desc: desc,
+        tool: List<String>.from(_tags),
+        imageURL:
+            _imagePaths.isNotEmpty ? _imagePaths : ['assets/images/bg1.png'],
+      );
+
+      await ProductRepo.instance.addproduct(newProduct);
+
+      if (!mounted) return;
+
+      _showMessage("The product has been added ✅", success: true);
+
+      // یک مقدار کوچک برای اینکه snackbar دیده شود
+      await Future.delayed(const Duration(milliseconds: 400));
+
+      if (!mounted) return;
+      context.pop('added');
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage("Failed to add product: $e", success: false);
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // اگر خواستی بعداً update هم اضافه می‌کنیم
+    if (widget.initialProduct != null) {
+      final p = widget.initialProduct!;
+      _nameController.text = p.title;
+      _selectedGroup = p.group;
+      _tags.clear();
+      _tags.addAll(p.tool);
+      _descriptionController.text = p.desc;
+      _imagePaths = List.from(p.imageURL);
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _tagController.dispose();
+    super.dispose();
   }
 
   @override
@@ -131,32 +153,36 @@ class _AddState extends State<Add> {
           children: [
             _buildHeader(),
             const SizedBox(height: 32),
+
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     _buildImageCard(),
                     const SizedBox(height: 24),
+
                     _buildTextField(
                       label: 'Name',
                       icon: Icons.badge_outlined,
                       controller: _nameController,
-                      onChanged: (value) => _name = value,
                       hint: 'Enter item name',
                     ),
+
                     const SizedBox(height: 20),
                     _buildGroupSelector(),
+
                     const SizedBox(height: 20),
                     _buildTagsSection(),
+
                     const SizedBox(height: 20),
                     _buildTextField(
                       label: 'Description',
                       icon: Icons.description_outlined,
                       controller: _descriptionController,
-                      onChanged: (value) => _description = value,
                       hint: 'Optional description',
                       maxLines: 1,
                     ),
+
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -169,32 +195,6 @@ class _AddState extends State<Add> {
         ),
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.initialProduct != null) {
-      final p = widget.initialProduct!;
-      _initialId = p.id;
-      _name = p.title;
-      _selectedGroup = p.group;
-      _tags.clear();
-      _tags.addAll(p.tool);
-      _description = p.desc;
-      _imagePaths = List.from(p.imageURL);
-      _nameController.text = _name;
-      _descriptionController.text = _description;
-      _tagController.text = '';
-    }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    _tagController.dispose();
-    super.dispose();
   }
 
   Widget _buildHeader() {
@@ -298,7 +298,7 @@ class _AddState extends State<Add> {
             Text(
               'Only images allowed',
               style: TextStyle(
-                color: Colors.grey.shade500,
+                color: Colors.grey,
                 fontSize: 12,
               ),
             ),
@@ -311,8 +311,7 @@ class _AddState extends State<Add> {
   Widget _buildTextField({
     required String label,
     required IconData icon,
-    required Function(String) onChanged,
-    TextEditingController? controller,
+    required TextEditingController controller,
     required String hint,
     int maxLines = 1,
   }) {
@@ -330,24 +329,23 @@ class _AddState extends State<Add> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(7),
-              border: BoxBorder.all(color: Colors.grey[300]!, width: 2)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(7),
+            border: Border.all(color: Colors.grey[300]!, width: 2),
+          ),
           child: TextField(
             controller: controller,
-            onChanged: onChanged,
             maxLines: maxLines,
             decoration: InputDecoration(
               hintText: hint,
               prefixIcon: Icon(icon, color: Colors.grey),
               border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(7),
-                  borderSide: BorderSide.none),
+                borderRadius: BorderRadius.circular(7),
+                borderSide: BorderSide.none,
+              ),
               filled: true,
               fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
           ),
         ),
@@ -371,9 +369,10 @@ class _AddState extends State<Add> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(7),
-              border: Border.all(color: Colors.grey[300]!, width: 2)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(7),
+            border: Border.all(color: Colors.grey[300]!, width: 2),
+          ),
           child: DropdownButton<String>(
             value: _selectedGroup,
             isExpanded: true,
@@ -405,7 +404,6 @@ class _AddState extends State<Add> {
     );
   }
 
-  // Tags Section
   Widget _buildTagsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,15 +418,15 @@ class _AddState extends State<Add> {
         ),
         const SizedBox(height: 8),
 
-        // Input Row
         Row(
           children: [
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(7),
-                    border: BoxBorder.all(color: Colors.grey[300]!, width: 2)),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(color: Colors.grey[300]!, width: 2),
+                ),
                 child: TextField(
                   controller: _tagController,
                   onChanged: (value) => _tagInput = value,
@@ -437,8 +435,9 @@ class _AddState extends State<Add> {
                     hintText: 'Enter tag',
                     prefixIcon: const Icon(Icons.tag, color: Colors.grey),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7),
-                        borderSide: BorderSide.none),
+                      borderRadius: BorderRadius.circular(7),
+                      borderSide: BorderSide.none,
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(
@@ -463,7 +462,6 @@ class _AddState extends State<Add> {
           ],
         ),
 
-        // Tags List
         if (_tags.isNotEmpty) ...[
           const SizedBox(height: 16),
           Wrap(
@@ -485,9 +483,10 @@ class _AddState extends State<Add> {
                     Text(
                       _tags[index],
                       style: TextStyle(
-                          color: Colors.grey.shade700,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16),
+                        color: Colors.grey.shade700,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(width: 6),
                     GestureDetector(
@@ -513,7 +512,7 @@ class _AddState extends State<Add> {
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () => context.pop(),
+            onPressed: _isSaving ? null : () => context.pop(),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 18),
               shape: RoundedRectangleBorder(
@@ -534,10 +533,7 @@ class _AddState extends State<Add> {
         const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {
-              _resetForm;
-              _saveForm;
-            },
+            onPressed: _isSaving ? null : _saveForm,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 18),
               shape: RoundedRectangleBorder(
@@ -546,14 +542,23 @@ class _AddState extends State<Add> {
               backgroundColor: Colors.grey,
               elevation: 0,
             ),
-            child: Text(
-              widget.initialProduct != null ? 'Update Item' : 'Add Item',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    widget.initialProduct != null ? 'Update Item' : 'Add Item',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ],
