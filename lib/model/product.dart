@@ -46,13 +46,13 @@ class Product {
     };
   }
 
-  factory Product.fromJson(Map<String, dynamic> json) {
+  factory Product.fromJson(Map<String, dynamic> map) {
     return Product(
-        id: (json["id"] ?? "").toString(),
-        title: json["title"] ?? "",
-        group: json["group"] ?? "",
-        desc: json["desc"] ?? "",
-        tool: List<String>.from(json["tool"] ?? []),
-        imageURL: List<String>.from(json["imageURL"] ?? []));
+        id: (map["id"] ?? "").toString(),
+        title: map["title"] ?? "",
+        group: map["group"] ?? "",
+        desc: map["desc"] ?? "",
+        tool: List<String>.from(map["tool"] ?? []),
+        imageURL: List<String>.from(map["imageURL"] ?? []));
   }
 }

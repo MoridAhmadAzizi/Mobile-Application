@@ -78,8 +78,9 @@ class _AddState extends State<Add> {
   Future<void> _saveForm() async {
     if (_isSaving) return;
 
-    final name = _nameController.text.trim();
-    final desc = _descriptionController.text.trim();
+    final bool isEdit = widget.initialProduct != null;
+    final String name = _nameController.text.trim();
+    final String desc = _descriptionController.text.trim();
 
     if (name.isEmpty) {
       _showMessage('Please enter name', success: false);
@@ -89,34 +90,43 @@ class _AddState extends State<Add> {
     setState(() => _isSaving = true);
 
     try {
-      final newProduct = Product(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+      final String productId = isEdit
+          ? widget.initialProduct!.id
+          : "";
+
+      final product = Product(
+        id: productId,
         title: name,
         group: _selectedGroup,
         desc: desc,
         tool: List<String>.from(_tags),
-        imageURL:
-            _imagePaths.isNotEmpty ? _imagePaths : ['assets/images/bg1.png'],
+        imageURL: _imagePaths.isNotEmpty ? _imagePaths : ['assets/images/bg1.png'],
       );
 
-      await ProductRepo.instance.addproduct(newProduct);
-
-      if (!mounted) return;
-
-      _showMessage("The product has been added ✅", success: true);
-
-      // یک مقدار کوچک برای اینکه snackbar دیده شود
-      await Future.delayed(const Duration(milliseconds: 400));
-
-      if (!mounted) return;
-      context.pop('added');
+      // ✅ فقط یکی از این‌ها اجرا شود
+      if (isEdit) {
+        await ProductRepo.instance.updateProduct(product);
+        if (!mounted) return;
+        _showMessage("Product updated successfully", success: true);
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        context.pop("updated");
+      } else {
+        await ProductRepo.instance.addproduct(product);
+        if (!mounted) return;
+        _showMessage("The product has been added", success: true);
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        context.pop("added");
+      }
     } catch (e) {
       if (!mounted) return;
-      _showMessage("Failed to add product: $e", success: false);
+      _showMessage("Failed: $e", success: false);
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
   }
+
 
   @override
   void initState() {
