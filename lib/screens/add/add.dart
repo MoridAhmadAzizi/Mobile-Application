@@ -308,8 +308,8 @@ class _AddState extends State<Add> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
                 ),
-                icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
-                label: Text(_imagePaths.isEmpty ? 'Select' : 'Add more'),
+                icon: const Icon(Icons.add_photo_alternate_outlined, size: 18, color: Colors.white,),
+                label: Text(_imagePaths.isEmpty ? 'Select' : 'Add more', style:const TextStyle(color: Colors.white),),
               ),
             ],
           ),
@@ -390,12 +390,6 @@ class _AddState extends State<Add> {
                 },
               ),
             ),
-
-          const SizedBox(height: 10),
-          const Text(
-            'Images will be kept in selected order. Tap × to remove.',
-            style: TextStyle(color: Colors.grey, fontSize: 12),
-          ),
         ],
       ),
     );

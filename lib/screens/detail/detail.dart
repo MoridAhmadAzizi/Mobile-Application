@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:wahab/data/product_data.dart';
 import 'package:wahab/model/product.dart';
 import 'package:wahab/model/tools.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wahab/services/product_repo.dart';
 import 'dart:io';
-import '../../data/product_data.dart';
+import 'package:get/get.dart';
 
 class Detail extends StatefulWidget {
   final Product product;
@@ -299,71 +302,52 @@ class _DetailState extends State<Detail> {
         child: Row(
           children: [
             Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  final result = await context.push('/add', extra: _product);
-                  if (result == 'updated') {
-                    setState(() {
-                      try {
-                        _product =
-                            products.firstWhere((p) => p.id == _product.id);
-                      } catch (e) {
-                        // If not found, keep the current
-                      }
-                    });
-                    if(mounted){
-                    context.pop('updated_from_detail');
+              child: Obx(() {
+                final online = ProductRepo.instance.isOnline.value;
+
+                return ElevatedButton.icon(
+                  onPressed: () async {
+                    if (!online) {
+                      ProductRepo.instance.showOfflineMassage();
+                      return;
                     }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.grey,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+
+                    final result = await context.push('/add',
+                        extra: _product); // یا /update
+                    if (result == 'updated') {
+                      setState(() {
+                        try {
+                          _product =
+                              products.firstWhere((p) => p.id == _product.id);
+                        } catch (_) {}
+                      });
+                      if (mounted) {
+                        context.pop('updated_from_detail');
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.grey,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
-                icon: const Icon(Icons.edit, color: Colors.white, size: 22),
-                label: const Text(
-                  'Update item',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                  icon: const Icon(Icons.edit, color: Colors.white, size: 22),
+                  label: Text(
+                    online ? 'Update item' : 'Read-only',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              ),
+                );
+              }),
             ),
           ],
         ),
       ),
     );
   }
-
-  // void _showDeleteDialog(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       title: const Text('Delete Product'),
-  //       content: const Text('Are you sure you want to delete this product? This action cannot be undone.'),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.of(context).pop(),
-  //           child: const Text('Cancel'),
-  //         ),
-  //         TextButton(
-  //           onPressed: () {
-  //             Navigator.of(context).pop();
-  //             // Delete logic here
-  //             Navigator.of(context).pop(); // Go back to home
-  //           },
-  //           child: const Text(
-  //             'Delete',
-  //             style: TextStyle(color: Colors.red),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

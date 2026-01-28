@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:wahab/objectbox/objectbox.dart';
 import 'package:wahab/screens/home/home.dart';
 import 'package:wahab/screens/add/add.dart';
 import 'package:wahab/screens/detail/detail.dart';
@@ -19,6 +20,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  final ob = await ObjectBoxApp.create();
+  Get.put<ObjectBoxApp>(ob);
+  
   Get.put(ProductRepo());
   runApp(const MyApp());
 }
@@ -35,8 +40,7 @@ class MyApp extends StatelessWidget {
       child: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-          }
+          if (snapshot.hasError) {}
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const MaterialApp(
               home: Scaffold(

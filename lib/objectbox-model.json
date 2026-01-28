@@ -1,0 +1,64 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:6325593865609052828",
+      "lastPropertyId": "7:3844230579915402002",
+      "name": "ProductEntity",
+      "properties": [
+        {
+          "id": "1:8591119453577104809",
+          "name": "obId",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4022932719659542640",
+          "name": "firebaseId",
+          "indexId": "1:6100498532185635186",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "3:7407146759109476084",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "4:3912098203805717944",
+          "name": "group",
+          "type": 9
+        },
+        {
+          "id": "5:6699404146537645459",
+          "name": "desc",
+          "type": 9
+        },
+        {
+          "id": "6:8190242792405447417",
+          "name": "tool",
+          "type": 30
+        },
+        {
+          "id": "7:3844230579915402002",
+          "name": "imageURL",
+          "type": 30
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:6325593865609052828",
+  "lastIndexId": "1:6100498532185635186",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

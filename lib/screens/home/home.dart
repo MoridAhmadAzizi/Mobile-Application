@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wahab/services/product_repo.dart';
 import 'dart:io';
 import '../../model/product.dart';
+import 'package:get/get.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -96,9 +98,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
-
             const SizedBox(height: 10),
-
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: CupertinoSearchTextField(
@@ -129,35 +129,43 @@ class _HomeState extends State<Home> {
                 autocorrect: true,
               ),
             ),
+            Obx(() {
+              final online = ProductRepo.instance.isOnline.value;
 
-            ElevatedButton.icon(
-              onPressed: () async {
-                final result = await context.push('/add');
-                // چون Stream داریم، حتی بدون setState هم آپدیت میشه
-                if (result == 'added' || result == 'updated') {
-                  setState(() {});
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black87,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+              return ElevatedButton.icon(
+                onPressed: () async {
+                  if (!online) {
+                    ProductRepo.instance.showOfflineMassage();
+                    return;
+                  }
+
+                  final result = await context.push('/add');
+                  if (result == 'added' || result == 'updated') {
+                    setState(() {});
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black87,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 2,
                 ),
-                elevation: 2,
-              ),
-              icon: const Icon(Icons.add, size: 20),
-              label: const Text(
-                'Add New',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ),
-
+                icon: const Icon(Icons.add, size: 20),
+                label: Text(
+                  online ? 'Add New' : 'Read-only',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              );
+            }),
             const SizedBox(height: 20),
             Expanded(
               child: StreamBuilder<List<Product>>(
-                stream: ProductRepo.instance.fetchproducts(),
+                stream: ProductRepo.instance.watchProducts(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -179,7 +187,6 @@ class _HomeState extends State<Home> {
                 },
               ),
             ),
-
             Container(
               margin: const EdgeInsets.all(2),
               height: kToolbarHeight - 8.0,
