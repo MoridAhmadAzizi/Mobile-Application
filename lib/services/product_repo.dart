@@ -61,8 +61,6 @@ class ProductRepo extends GetxController {
         final p = Product.fromJson(data);
         return ProductEntity.fromProduct(p);
       }).toList();
-
-      // چون آفلاین اجازه تغییر نداریم، امن است که کل cache را جایگزین کنیم
       _ob.store.runInTransaction(TxMode.write, () {
         _ob.productBox.removeAll();
         _ob.productBox.putMany(entities);

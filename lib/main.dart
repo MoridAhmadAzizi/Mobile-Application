@@ -25,7 +25,8 @@ void main() async {
   Get.put<ObjectBoxApp>(ob);
   
   Get.put(ProductRepo());
-  runApp(const MyApp());
+  runApp(
+  const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -42,8 +43,12 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasError) {}
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const MaterialApp(
-              home: Scaffold(
+            return MaterialApp(
+                theme: ThemeData(
+            fontFamily: 'Vazirmatn',
+              ),
+              home:
+               const Scaffold(
                 body: Center(
                   child: CircularProgressIndicator(),
                 ),

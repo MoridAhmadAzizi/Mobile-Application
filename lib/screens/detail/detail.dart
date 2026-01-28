@@ -62,7 +62,7 @@ class _DetailState extends State<Detail> {
       appBar: AppBar(
           centerTitle: true,
           title: const Text(
-            'Product Details',
+            'توضیحات محصول',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -175,24 +175,6 @@ class _DetailState extends State<Detail> {
                   color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.confirmation_number,
-                    color: Colors.grey,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'ID: ${_product.id}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ],
-              ),
               const SizedBox(height: 15),
               Row(
                 children: [
@@ -222,7 +204,7 @@ class _DetailState extends State<Detail> {
               ),
               const SizedBox(height: 10),
               const Text(
-                'Description',
+                'توضیحات',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -242,7 +224,7 @@ class _DetailState extends State<Detail> {
               ),
               const SizedBox(height: 15),
               const Text(
-                'Tools & Accessories',
+                'ابزارات',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -335,7 +317,7 @@ class _DetailState extends State<Detail> {
                   ),
                   icon: const Icon(Icons.edit, color: Colors.white, size: 22),
                   label: Text(
-                    online ? 'Update item' : 'Read-only',
+                    online ? 'ویرایش محصول' : 'حالت خوانیش',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,

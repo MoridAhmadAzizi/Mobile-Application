@@ -52,6 +52,9 @@ dependencies:
   objectbox: ^5.1.0
   objectbox_flutter_libs: ^5.1.0
   connectivity_plus: ^7.0.0
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+  flutter_image_compress: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -78,10 +81,10 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/Vazir.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

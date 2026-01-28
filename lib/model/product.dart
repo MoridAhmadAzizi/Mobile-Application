@@ -7,7 +7,8 @@ class Product {
   final List<String> imageURL;
 
   Product(
-      {required this.id,
+      {
+      required this.id,
       required this.title,
       required this.group,
       required this.desc,

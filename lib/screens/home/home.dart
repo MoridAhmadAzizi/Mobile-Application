@@ -39,9 +39,9 @@ class _HomeState extends State<Home> {
     final searched = _applySearch(list);
 
     if (tabIndex == 0) {
-      return searched.where((p) => p.group == 'Group A').toList();
+      return searched.where((p) => p.group == 'گروپ اول').toList();
     } else if (tabIndex == 1) {
-      return searched.where((p) => p.group == 'Group B').toList();
+      return searched.where((p) => p.group == 'گروپ دوم').toList();
     } else {
       return searched;
     }
@@ -57,7 +57,7 @@ class _HomeState extends State<Home> {
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: Colors.black87,
           title: const Text(
-            'Application Home',
+            'لیست محصولات',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
@@ -66,8 +66,10 @@ class _HomeState extends State<Home> {
         body: Column(
           children: [
             Container(
+            
               margin: const EdgeInsets.only(top: 20.0, left: 15.0, right: 15.0),
               decoration: BoxDecoration(
+
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
@@ -83,12 +85,15 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
-              child: Padding(
+              child:
+               Padding(
                 padding: const EdgeInsets.all(15.0),
-                child: Center(
-                  child: Text(
-                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy,",
+                child: Center
+                (  child:
+                   Text(
+                    "این برنامه برای ثبت و ویرایش محصولات می باشد که معلومات به شکل محلی داخل سیستم ذخیره می شوند",
                     style: TextStyle(
+                      fontFamily: 'Vazirmatn',
                       fontSize: 16,
                       decoration: TextDecoration.none,
                       color: Colors.grey[700],
@@ -111,8 +116,9 @@ class _HomeState extends State<Home> {
                     width: 2.0,
                   ),
                 ),
-                placeholder: 'Search...',
+                placeholder: 'جستجو.....',
                 placeholderStyle: TextStyle(
+                  fontFamily: 'Vazirmatn',
                   color: Colors.grey.shade500,
                   fontSize: 18.0,
                 ),
@@ -131,14 +137,14 @@ class _HomeState extends State<Home> {
             ),
             Obx(() {
               final online = ProductRepo.instance.isOnline.value;
-        
+
               return ElevatedButton.icon(
                 onPressed: () async {
                   if (!online) {
                     ProductRepo.instance.showOfflineMassage();
                     return;
                   }
-        
+
                   final result = await context.push('/add');
                   if (result == 'added' || result == 'updated') {
                     setState(() {});
@@ -148,17 +154,21 @@ class _HomeState extends State<Home> {
                   backgroundColor: Colors.black87,
                   foregroundColor: Colors.white,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
+                      const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   elevation: 2,
                 ),
-                icon: const Icon(Icons.add, size: 20),
+                
+                icon:
+                online ? 
+                const Icon(Icons.add, size: 20) : 
+                const Icon(Icons.book , size: 20),
                 label: Text(
-                  online ? 'Add New' : 'Read-only',
+                  online ? 'اضافه کردن' : 'حالت خوانیش',
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600),
+                      fontSize: 20, fontWeight: FontWeight.w600),
                 ),
               );
             }),
@@ -170,13 +180,13 @@ class _HomeState extends State<Home> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
-        
+            
                   if (snapshot.hasError) {
                     return Center(child: Text("Error: ${snapshot.error}"));
                   }
-        
+            
                   final allProducts = snapshot.data ?? [];
-        
+            
                   return TabBarView(
                     children: [
                       _buildTabContent(0, allProducts),
@@ -196,13 +206,13 @@ class _HomeState extends State<Home> {
               ),
               child: TabBar(
                 tabs: const [
-                  Tab(text: 'Group A'),
-                  Tab(text: 'Group B'),
-                  Tab(text: 'All'),
+                  Tab(text: 'گروپ اول'),
+                  Tab(text: 'گروپ دوم'),
+                  Tab(text: 'همه'),
                 ],
                 labelColor: Colors.white,
                 indicatorColor: Colors.grey,
-                labelStyle: const TextStyle(fontSize: 16),
+                labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 unselectedLabelColor: Colors.grey,
                 indicator: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
@@ -217,7 +227,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // ✅ این تابع تغییر کرد: لیست را ورودی می‌گیرد
   Widget _buildTabContent(int tabIndex, List<Product> allProducts) {
     final products = _getProductsByTab(allProducts, tabIndex);
 
@@ -233,7 +242,7 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(height: 15),
             Text(
-              '"$_searchText" not found',
+              '"$_searchText"پیدا نشد',
               style: const TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
@@ -242,7 +251,7 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(height: 5),
             const Text(
-              'Try different keywords',
+              'کلمه دیگری را امتحان کنید!',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
@@ -256,7 +265,7 @@ class _HomeState extends State<Home> {
     if (products.isEmpty) {
       return const Center(
         child: Text(
-          "No products found",
+          "پیدا نشد",
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
       );
@@ -437,12 +446,12 @@ Widget buildMenuItems(BuildContext context) => Padding(
         children: [
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Profile'),
+            title: const Text('پروفایل'),
             onTap: () {},
           ),
           const ListTile(
             leading: Icon(Icons.logout, color: Colors.red),
-            title: Text('Log out', style: TextStyle(color: Colors.red)),
+            title: Text('خارج شدن', style: TextStyle(color: Colors.red)),
             onTap: signUserout,
           ),
         ],

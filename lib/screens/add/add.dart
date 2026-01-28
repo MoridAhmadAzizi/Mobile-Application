@@ -19,10 +19,10 @@ class _AddState extends State<Add> {
   final ImagePicker _picker = ImagePicker();
   List<String> _imagePaths = [];
 
-  String _selectedGroup = 'Group A';
+  String _selectedGroup = 'گروپ اول';
   String _tagInput = '';
 
-  final List<String> _groups = ['Group A', 'Group B'];
+  final List<String> _groups = ['گروپ اول', 'گروپ دوم'];
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
@@ -106,7 +106,7 @@ class _AddState extends State<Add> {
     final String desc = _descriptionController.text.trim();
 
     if (name.isEmpty) {
-      _showMessage('Please enter name', success: false);
+      _showMessage('لطفاً نام محصول را وارد کنید', success: false);
       return;
     }
 
@@ -206,10 +206,10 @@ class _AddState extends State<Add> {
                       const SizedBox(height: 24),
 
                       _buildTextField(
-                        label: 'Name',
+                        label: 'نام محصول',
                         icon: Icons.badge_outlined,
                         controller: _nameController,
-                        hint: 'Enter item name',
+                        hint: 'نام محصول را وارد کنید',
                       ),
 
                       const SizedBox(height: 20),
@@ -220,11 +220,11 @@ class _AddState extends State<Add> {
 
                       const SizedBox(height: 20),
                       _buildTextField(
-                        label: 'Description',
+                        label: 'توضیحات',
                         icon: Icons.description_outlined,
                         controller: _descriptionController,
-                        hint: 'Optional description',
-                        maxLines: 2,
+                        hint: 'توضیحات محصول (اختیاری)',
+                        maxLines: 1,
                       ),
 
                       const SizedBox(height: 40),
@@ -253,7 +253,7 @@ class _AddState extends State<Add> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              isEdit ? 'Update Item' : 'Upload New Item',
+              isEdit ? 'ویرایش محصول' : 'محصول جدید',
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
@@ -261,10 +261,6 @@ class _AddState extends State<Add> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Fill in the details below',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-            ),
           ],
         ),
       ],
@@ -287,7 +283,7 @@ class _AddState extends State<Add> {
           Row(
             children: [
               const Text(
-                'Images',
+                'عکس ها',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
@@ -309,7 +305,7 @@ class _AddState extends State<Add> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
                 ),
                 icon: const Icon(Icons.add_photo_alternate_outlined, size: 18, color: Colors.white,),
-                label: Text(_imagePaths.isEmpty ? 'Select' : 'Add more', style:const TextStyle(color: Colors.white),),
+                label: Text(_imagePaths.isEmpty ? 'انتخاب' : 'افزودن', style:const TextStyle(color: Colors.white),),
               ),
             ],
           ),
@@ -332,7 +328,7 @@ class _AddState extends State<Add> {
                     Icon(Icons.cloud_upload_outlined, size: 42, color: Colors.grey),
                     SizedBox(height: 10),
                     Text(
-                      'Tap to select up to 10 images',
+                      'حد مجاز برای انتخاب عکس الی 10 عدد.',
                       style: TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -445,7 +441,7 @@ class _AddState extends State<Add> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Group',
+          'گروپ',
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -491,7 +487,7 @@ class _AddState extends State<Add> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Tags',
+          'ابزارات',
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -514,7 +510,7 @@ class _AddState extends State<Add> {
                   onChanged: (value) => _tagInput = value,
                   onSubmitted: (_) => _addTag(),
                   decoration: InputDecoration(
-                    hintText: 'Enter tag',
+                    hintText: 'ابزار مورد نظر را وارد کنید.',
                     prefixIcon: const Icon(Icons.tag, color: Colors.grey),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(7),
@@ -591,11 +587,11 @@ class _AddState extends State<Add> {
               side: BorderSide(color: Colors.grey.shade300),
             ),
             child: const Text(
-              'Cancel',
+              'لغو کردن',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: Colors.black87
               ),
             ),
           ),
@@ -617,7 +613,7 @@ class _AddState extends State<Add> {
                     child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                   )
                 : Text(
-                    isEdit ? 'Update Item' : 'Add Item',
+                    isEdit ? 'آپدیت محصول' : 'افزودن محصول',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
