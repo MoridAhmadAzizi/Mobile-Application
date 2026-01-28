@@ -131,14 +131,14 @@ class _HomeState extends State<Home> {
             ),
             Obx(() {
               final online = ProductRepo.instance.isOnline.value;
-
+        
               return ElevatedButton.icon(
                 onPressed: () async {
                   if (!online) {
                     ProductRepo.instance.showOfflineMassage();
                     return;
                   }
-
+        
                   final result = await context.push('/add');
                   if (result == 'added' || result == 'updated') {
                     setState(() {});
@@ -170,13 +170,13 @@ class _HomeState extends State<Home> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
-
+        
                   if (snapshot.hasError) {
                     return Center(child: Text("Error: ${snapshot.error}"));
                   }
-
+        
                   final allProducts = snapshot.data ?? [];
-
+        
                   return TabBarView(
                     children: [
                       _buildTabContent(0, allProducts),

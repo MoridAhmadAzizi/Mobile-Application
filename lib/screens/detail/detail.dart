@@ -313,7 +313,7 @@ class _DetailState extends State<Detail> {
                     }
 
                     final result = await context.push('/add',
-                        extra: _product); // یا /update
+                        extra: _product); 
                     if (result == 'updated') {
                       setState(() {
                         try {
