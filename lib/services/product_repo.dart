@@ -25,12 +25,6 @@ class ProductRepo extends GetxController {
     _initConnectivity();
   }
 
-  void showOfflineMassage() {
-    Get.snackbar("Offline", "You are offline, Check your internet connection",
-    snackPosition: SnackPosition.BOTTOM
-    );
-  }
-
   void _initConnectivity() async {
     final results = await Connectivity().checkConnectivity();
     _setOnlineFromResults(results);
@@ -79,10 +73,10 @@ class ProductRepo extends GetxController {
     });
   }
 
-  void _offlineError() {
+  void offlineError() {
     Get.snackbar(
-      "Offline",
-      "You are offline. Read-only mode (no add/update).",
+      "خطا در اتصال",
+      "شما آفلاین هستید! اتصال خود را با انترنیت بررسی کنید.",
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.red.withAlpha(40),
       colorText: Colors.white,
@@ -115,8 +109,8 @@ class ProductRepo extends GetxController {
 
   Future<void> addproduct(Product product) async {
     if (!isOnline.value) {
-      _offlineError();
-      throw Exception("Offline: add is disabled");
+      offlineError();
+      throw Exception("آفلاین هستید! نمیتوانید کارتی را اضافه کنید.");
     }
 
     try {
@@ -136,16 +130,16 @@ class ProductRepo extends GetxController {
       _upsertLocalCache(newProduct);
 
       Get.snackbar(
-        "Success",
-        "Product added with ID: $serialId",
+        "موفیقت",
+        "محصول با نمبر مسلسل $serialId اضافه شد!:",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green.withAlpha(40),
         colorText: Colors.white,
       );
     } catch (e) {
       Get.snackbar(
-        "Error",
-        "Failed to add product: $e",
+        "خطاء",
+        "خطاءدر اتصال با سرور: $e",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.withAlpha(40),
         colorText: Colors.white,
@@ -156,8 +150,8 @@ class ProductRepo extends GetxController {
 
   Future<void> updateProduct(Product product) async {
     if (!isOnline.value) {
-      _offlineError();
-      throw Exception("Offline: update is disabled");
+      offlineError();
+      throw Exception("آفلاین هستید! ارتباط خود را با انترنیت بررسی کنید!");
     }
 
     try {
@@ -166,16 +160,16 @@ class ProductRepo extends GetxController {
       _upsertLocalCache(product);
 
       Get.snackbar(
-        "Success",
-        "The product has been updated",
+        "موفقیت",
+        "محصول موفقانه ویرایش شد.",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.blue.withAlpha(40),
         colorText: Colors.white,
       );
     } catch (e) {
       Get.snackbar(
-        "Error",
-        "Failed to update the product: $e",
+        "خطاء",
+        "خطا در ویرایش محصول: $e",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.withAlpha(40),
         colorText: Colors.white,

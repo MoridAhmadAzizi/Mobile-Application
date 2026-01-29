@@ -58,8 +58,9 @@ class _DetailState extends State<Detail> {
         : ['assets/images/placeholder.png'];
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.white),
           centerTitle: true,
           title: const Text(
             'توضیحات محصول',
@@ -68,12 +69,12 @@ class _DetailState extends State<Detail> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          backgroundColor: Colors.grey[500],
+          backgroundColor: Colors.grey[900],
           elevation: 0),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Container(
-          padding: const EdgeInsets.all(25),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -188,15 +189,15 @@ class _DetailState extends State<Detail> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       _product.group,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey,
+                        color: Colors.grey[700]!,
                       ),
                     ),
                   ),
@@ -212,6 +213,7 @@ class _DetailState extends State<Detail> {
                 ),
               ),
               const SizedBox(height: 5),
+              if(_product.desc.isNotEmpty)
               SizedBox(
                 child: Text(
                   _product.desc,
@@ -221,10 +223,28 @@ class _DetailState extends State<Detail> {
                     height: 1.5,
                   ),
                 ),
-              ),
+              )
+              else
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'توضیحاتی درباره این محصول وجود ندارد.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 15),
               const Text(
-                'ابزارات',
+                'ابزار و آلات',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -246,19 +266,18 @@ class _DetailState extends State<Detail> {
                 )
               else
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey[200]!),
                   ),
                   child: const Center(
                     child: Text(
-                      'No tools specified',
+                      'هیچ کدام ابزاری اضافه نشده است.',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
-                        fontStyle: FontStyle.italic,
                       ),
                     ),
                   ),
@@ -286,11 +305,10 @@ class _DetailState extends State<Detail> {
             Expanded(
               child: Obx(() {
                 final online = ProductRepo.instance.isOnline.value;
-
                 return ElevatedButton.icon(
                   onPressed: () async {
                     if (!online) {
-                      ProductRepo.instance.showOfflineMassage();
+                      ProductRepo.instance.offlineError();
                       return;
                     }
 
@@ -310,7 +328,7 @@ class _DetailState extends State<Detail> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.grey,
+                    backgroundColor: Colors.grey[900],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -330,6 +348,8 @@ class _DetailState extends State<Detail> {
           ],
         ),
       ),
+    
+    
     );
   }
 }

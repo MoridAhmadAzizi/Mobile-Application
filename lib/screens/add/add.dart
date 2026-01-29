@@ -121,21 +121,22 @@ class _AddState extends State<Add> {
         group: _selectedGroup,
         desc: desc,
         tool: List<String>.from(_tags),
-        imageURL:
-            _imagePaths.isNotEmpty ? List<String>.from(_imagePaths) : ['assets/images/bg1.png'],
+        imageURL: _imagePaths.isNotEmpty
+            ? List<String>.from(_imagePaths)
+            : ['assets/images/product.png'],
       );
 
       if (isEdit) {
         await ProductRepo.instance.updateProduct(product);
         if (!mounted) return;
-        _showMessage("Product updated successfully", success: true);
+        _showMessage("محصول موفقانه ویرایش شد!", success: true);
         await Future.delayed(const Duration(milliseconds: 300));
         if (!mounted) return;
         context.pop("updated");
       } else {
         await ProductRepo.instance.addproduct(product);
         if (!mounted) return;
-        _showMessage("The product has been added", success: true);
+        _showMessage("محصول موفقانه اضافه شد!", success: true);
         await Future.delayed(const Duration(milliseconds: 300));
         if (!mounted) return;
         context.pop("added");
@@ -188,85 +189,62 @@ class _AddState extends State<Add> {
     final isEdit = widget.initialProduct != null;
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(isEdit: isEdit),
-              const SizedBox(height: 24),
-
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _buildImageCard(),
-                      const SizedBox(height: 24),
-
-                      _buildTextField(
-                        label: 'نام محصول',
-                        icon: Icons.badge_outlined,
-                        controller: _nameController,
-                        hint: 'نام محصول را وارد کنید',
-                      ),
-
-                      const SizedBox(height: 20),
-                      _buildGroupSelector(),
-
-                      const SizedBox(height: 20),
-                      _buildTagsSection(),
-
-                      const SizedBox(height: 20),
-                      _buildTextField(
-                        label: 'توضیحات',
-                        icon: Icons.description_outlined,
-                        controller: _descriptionController,
-                        hint: 'توضیحات محصول (اختیاری)',
-                        maxLines: 1,
-                      ),
-
-                      const SizedBox(height: 40),
-                    ],
-                  ),
-                ),
-              ),
-
-              _buildActionButtons(isEdit: isEdit),
-            ],
+      appBar: AppBar(
+        backgroundColor: Colors.grey[900],
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          isEdit ? 'ویرایش محصول' : 'محصول جدید',
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
         ),
+        centerTitle: true,
+      ),
+      backgroundColor: Colors.grey[50],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child:
+               Padding(
+                 padding: const EdgeInsets.all(20),
+                 child: Column(
+                  children: [
+                    _buildImageCard(),
+                    const SizedBox(height: 24),
+                    _buildTextField(
+                      label: 'نام محصول',
+                      icon: Icons.badge_outlined,
+                      controller: _nameController,
+                      hint: 'نام محصول را وارد کنید',
+                    ),
+                    const SizedBox(height: 20),
+                    _buildGroupSelector(),
+                    const SizedBox(height: 20),
+                    _buildTagsSection(),
+                    const SizedBox(height: 20),
+                    _buildTextField(
+                      label: 'توضیحات',
+                      icon: Icons.description_outlined,
+                      controller: _descriptionController,
+                      hint: 'توضیحات محصول (اختیاری)',
+                      maxLines: 1,
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                               ),
+               ),
+            ),
+          ),
+          _buildActionButtons(isEdit: isEdit),
+        ],
       ),
     );
   }
 
-  Widget _buildHeader({required bool isEdit}) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: _isSaving ? null : () => context.pop(),
-          icon: const Icon(Icons.arrow_back),
-        ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              isEdit ? 'ویرایش محصول' : 'محصول جدید',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 4),
-          ],
-        ),
-      ],
-    );
-  }
-  
   Widget _buildImageCard() {
     return Container(
       width: double.infinity,
@@ -301,17 +279,25 @@ class _AddState extends State<Add> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey.shade800,
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(7)),
                 ),
-                icon: const Icon(Icons.add_photo_alternate_outlined, size: 18, color: Colors.white,),
-                label: Text(_imagePaths.isEmpty ? 'انتخاب' : 'افزودن', style:const TextStyle(color: Colors.white),),
+                icon: const Icon(
+                  Icons.add_photo_alternate_outlined,
+                  size: 18,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  _imagePaths.isEmpty ? 'انتخاب' : 'افزودن',
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 12),
 
-          // Content
           if (_imagePaths.isEmpty)
             GestureDetector(
               onTap: _pickImages,
@@ -323,9 +309,10 @@ class _AddState extends State<Add> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.grey.shade200),
                 ),
-                child:const Column(
+                child: const Column(
                   children: [
-                    Icon(Icons.cloud_upload_outlined, size: 42, color: Colors.grey),
+                    Icon(Icons.cloud_upload_outlined,
+                        size: 42, color: Colors.grey),
                     SizedBox(height: 10),
                     Text(
                       'حد مجاز برای انتخاب عکس الی 10 عدد.',
@@ -354,7 +341,8 @@ class _AddState extends State<Add> {
                           borderRadius: BorderRadius.circular(10),
                           child: Container(
                             color: Colors.grey.shade100,
-                            child: SizedBox.expand(child: _buildImageThumb(path)),
+                            child:
+                                SizedBox.expand(child: _buildImageThumb(path)),
                           ),
                         ),
                         Positioned(
@@ -428,7 +416,8 @@ class _AddState extends State<Add> {
               ),
               filled: true,
               fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
           ),
         ),
@@ -487,7 +476,7 @@ class _AddState extends State<Add> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'ابزارات',
+          'ابزار و آلات',
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -495,7 +484,6 @@ class _AddState extends State<Add> {
           ),
         ),
         const SizedBox(height: 8),
-
         Row(
           children: [
             Expanded(
@@ -518,7 +506,8 @@ class _AddState extends State<Add> {
                     ),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
                   ),
                 ),
               ),
@@ -536,7 +525,6 @@ class _AddState extends State<Add> {
             ),
           ],
         ),
-
         if (_tags.isNotEmpty) ...[
           const SizedBox(height: 16),
           Wrap(
@@ -544,9 +532,10 @@ class _AddState extends State<Add> {
             runSpacing: 10,
             children: List.generate(_tags.length, (index) {
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(7),
                 ),
                 child: Row(
@@ -555,15 +544,16 @@ class _AddState extends State<Add> {
                     Text(
                       _tags[index],
                       style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[800],
+                        fontWeight: FontWeight.w800,
                         fontSize: 16,
                       ),
                     ),
                     const SizedBox(width: 6),
                     GestureDetector(
                       onTap: () => _removeTag(index),
-                      child: Icon(Icons.close, size: 16, color: Colors.grey.shade700),
+                      child: Icon(Icons.close,
+                      size: 16, color: Colors.grey[900]),
                     ),
                   ],
                 ),
@@ -576,53 +566,70 @@ class _AddState extends State<Add> {
   }
 
   Widget _buildActionButtons({required bool isEdit}) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: _isSaving ? null : () => context.pop(),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-              side: BorderSide(color: Colors.grey.shade300),
+    return 
+    Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withAlpha(80),
+              blurRadius: 10,
+              offset: const Offset(0, -1),
             ),
-            child: const Text(
-              'لغو کردن',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87
+          ],
+        ),
+      child: Row(
+        children:
+         [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _isSaving ? null : () => context.pop(),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(7)),
+                side: BorderSide(color: Colors.grey.shade300),
+              ),
+              child: const Text(
+                'لغو کردن',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: _isSaving ? null : _saveForm,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-              backgroundColor: Colors.grey.shade800,
-              elevation: 0,
-            ),
-            child: _isSaving
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                  )
-                : Text(
-                    isEdit ? 'آپدیت محصول' : 'افزودن محصول',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+          const SizedBox(width: 10),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: _isSaving ? null : _saveForm,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(7)),
+                backgroundColor: Colors.grey[900],
+                elevation: 0,
+              ),
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2.5, color: Colors.white),
+                    )
+                  : Text(
+                      isEdit ? 'آپدیت محصول' : 'افزودن محصول',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

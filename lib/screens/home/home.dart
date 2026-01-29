@@ -66,10 +66,8 @@ class _HomeState extends State<Home> {
         body: Column(
           children: [
             Container(
-            
-              margin: const EdgeInsets.only(top: 20.0, left: 15.0, right: 15.0),
+              margin: const EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
               decoration: BoxDecoration(
-
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
@@ -141,7 +139,7 @@ class _HomeState extends State<Home> {
               return ElevatedButton.icon(
                 onPressed: () async {
                   if (!online) {
-                    ProductRepo.instance.showOfflineMassage();
+                    ProductRepo.instance.offlineError();
                     return;
                   }
 
@@ -278,7 +276,7 @@ class _HomeState extends State<Home> {
           if (product.imageURL.isNotEmpty && product.imageURL[0].isNotEmpty) {
             imagePath = product.imageURL[0];
           } else {
-            imagePath = 'assets/images/bg1.png';
+            imagePath = 'assets/images/product.png';
           }
 
           bool isAsset = imagePath.startsWith('assets/');
@@ -311,7 +309,7 @@ class _HomeState extends State<Home> {
       },
       child: Container(
         padding: const EdgeInsets.all(10),
-        margin: const EdgeInsets.only(left: 15, right: 15, bottom: 10, top: 10),
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 10, top: 10),
         decoration: BoxDecoration(
           color: Colors.grey.shade50,
           borderRadius: BorderRadius.circular(9),
@@ -424,7 +422,7 @@ Widget buildHeaderItems(BuildContext context, User? user) => SafeArea(
             const SizedBox(height: 10),
             const CircleAvatar(
               radius: 52,
-              backgroundImage: AssetImage('assets/images/bg1.png'),
+              backgroundImage: AssetImage('assets/images/product.png'),
             ),
             const SizedBox(height: 6),
             const Text(

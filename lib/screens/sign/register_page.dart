@@ -57,22 +57,22 @@ class _RegisterPageState extends State<RegisterPage> {
 
       switch (e.code) {
         case 'user-not-found':
-          errorMessage = 'No User found with this Email';
+          errorMessage = 'هیچ کدام کاربری با این ایمیل یافت نشد!';
           break;
         case 'wrong-password':
-          errorMessage = 'Password is incorrect';
+          errorMessage = 'رمز عبور اشتباه هست!';
           break;
         case 'invalid-email':
-          errorMessage = 'Invalid email';
+          errorMessage = 'ایمیل نامعتبر!';
           break;
         case 'user-disabled':
-          errorMessage = 'This Account has been disabled';
+          errorMessage = 'این اکانت از طرف سازمان غیر فعال شده است!';
           break;
         case 'too-many-requests':
-          errorMessage = 'Many attempts , try later';
+          errorMessage = 'تلاش های ناموفق، بعداً تلاش کنید!';
           break;
         default:
-          errorMessage = 'error: ${e.message}';
+          errorMessage = 'یک خطاء غیر منتظره رخ داد!';
       }
 
       showErrorMassage(errorMessage);
@@ -83,28 +83,16 @@ class _RegisterPageState extends State<RegisterPage> {
       }
 
       // Show generic error
-      showErrorMassage('ops:something happended:$e');
+      showErrorMassage('یک خطاء غیر منتظره رخ داد!');
     }
   }
 
   void showErrorMassage(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Center(
-          child: AlertDialog(
-            backgroundColor: Colors.deepPurple,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            content: Text(
-              message,
-              style:const TextStyle(color: Colors.white, fontSize: 20),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      },
+     ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red.shade600,
+      ),
     );
   }
 
@@ -122,32 +110,32 @@ class _RegisterPageState extends State<RegisterPage> {
                const Icon(Icons.lock, size: 100),
               const  SizedBox(height: 50),
                 Text(
-                  'Let\'s Create an account for you!',
+                  'بیاید یک حساب کاربری برای خود بسازید!',
                   style: TextStyle(color: Colors.grey[700], fontSize: 16),
                 ),
               const  SizedBox(height: 25),
                 MyTextField(
                   obsucreText: false,
-                  hintText: 'Enter your username',
+                  hintText: 'ایمیل خود را وارد کنید.',
                   controller: usernameController,
                 ),
              const   SizedBox(height: 10),
                 MyTextField(
                   obsucreText: true,
-                  hintText: 'Enter your password',
+                  hintText: 'رمز عبور خود را وارد کنید.',
                   controller: passwordController,
                 ),
                const SizedBox(height: 10),
                 MyTextField(
                   obsucreText: true,
-                  hintText: 'Confirm your password',
+                  hintText: 'رمز عبور خود را تایید کنید.',
                   controller: confirmPasswordController,
                 ),
               const  SizedBox(height: 10),
                 const SizedBox(height: 25),
                 MyButton(
                   onTap: signUserUp,
-                  button: 'Sign up',
+                  button: 'ثبت نام',
                 ),
                const  SizedBox(height: 50),
                 Padding(
@@ -160,7 +148,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       Padding(
                         padding:const  EdgeInsets.symmetric(horizontal: 10.0),
                         child: Text(
-                          'Or Continue with',
+                          'یا',
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                       ),
@@ -180,13 +168,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         size: 28,
                       ),
                       onTap: () {}, // Apple ID - فعلاً خالی
-                      text: 'Sign Up with your Apple ID',
+                      text: 'ثبت نام با Apple ID خودتان!',
                     ),
                     const SizedBox(height: 10),
                     SqureTile(
                       icon: Logo(Logos.google, size: 28),
                       onTap: () => AuthService().signInWithGoogle(),// اصلاح شد
-                      text: 'Sign Up with your Google Account',
+                      text: 'ثبت نام با Google account خودتان!',
                     ),
                   ],
                 ),
@@ -195,14 +183,14 @@ class _RegisterPageState extends State<RegisterPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account?',
+                      'حساب کاربری از قبل دارید؟',
                       style: TextStyle(color: Colors.grey[700]),
                     ),
                     const SizedBox(width: 4),
                     GestureDetector(
                       onTap: widget.onTap,
                       child: const Text(
-                        'Login now',
+                        'همین حالا وارد شوید.',
                         style: TextStyle(
                           color: Colors.grey,
                           fontWeight: FontWeight.bold,

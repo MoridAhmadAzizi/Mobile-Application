@@ -47,22 +47,22 @@ class _LoginPageState extends State<LoginPage> {
 
       switch (e.code) {
         case 'user-not-found':
-          errorMessage = 'No User found with this Email';
+          errorMessage = 'هیچ کاربری با این ایمیل یافت نشد!';
           break;
         case 'wrong-password':
-          errorMessage = 'Password is incorrect';
+          errorMessage = 'رمز عبور اشتباه هست';
           break;
         case 'invalid-email':
-          errorMessage = 'Invalid email';
+          errorMessage = 'ایمیل نامعتبر';
           break;
         case 'user-disabled':
-          errorMessage = 'This Account has been disabled';
+          errorMessage = 'این حساب از طرف سازمان غیر فعال شده است!';
           break;
         case 'too-many-requests':
-          errorMessage = 'Many attempts , try later';
+          errorMessage = 'تلاش های مکرر، بعداً امتحان کنید';
           break;
         default:
-          errorMessage = 'error: ${e.message}';
+          errorMessage = 'خطاء ورود به سیستم';
       }
 
       showErrorMassage(errorMessage);
@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pop(context);
       }
       // Show generic error
-      showErrorMassage('ops:something happended:$e');
+      showErrorMassage('خطاء در اتصال با سرور');
     }
   }
 
@@ -98,19 +98,19 @@ class _LoginPageState extends State<LoginPage> {
                 const Icon(Icons.lock, size: 100),
                 const SizedBox(height: 50),
                 Text(
-                  'Welcome Back you have been missed',
+                  'خوش آمدید دوباره!',
                   style: TextStyle(color: Colors.grey[700], fontSize: 16),
                 ),
                 const SizedBox(height: 25),
                 MyTextField(
                   obsucreText: false,
-                  hintText: 'Enter your username',
+                  hintText: 'ایمیل خود را وارد کنید.',
                   controller: usernameController,
                 ),
                 const SizedBox(height: 10),
                 MyTextField(
                   obsucreText: true,
-                  hintText: 'Enter your password',
+                  hintText: 'رمز عبور خود را وارد کنید.',
                   controller: passwordController,
                 ),
                 const SizedBox(height: 10),
@@ -120,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        'Forgot the password?',
+                        'رمز عبور را فراموش کرده اید؟',
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                     ],
@@ -129,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 25),
                 MyButton(
                   onTap: signUserIn,
-                  button: 'Sign In',
+                  button: 'ورود به سیستم',
                 ),
                 const SizedBox(height: 50),
                 Padding(
@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Text(
-                          'Or Continue with',
+                          'یا',
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                       ),
@@ -162,13 +162,13 @@ class _LoginPageState extends State<LoginPage> {
                         size: 28,
                       ),
                       onTap: () {},
-                      text: 'Sign In With your Apple ID',
+                      text: 'ورود با Apple ID خودتان!',
                     ),
                     const SizedBox(height: 10),
                     SqureTile(
                       icon: Logo(Logos.google, size: 28),
                       onTap: () => AuthService().signInWithGoogle(),
-                      text: 'Sign In With your Google Account',
+                      text: 'ورود با Google Account خودتان!',
                     ),
                   ],
                 ),
@@ -177,14 +177,14 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Not a member yet?',
+                      'هنوز عضو نشده اید؟',
                       style: TextStyle(color: Colors.grey[700]),
                     ),
                     const SizedBox(width: 4),
                     GestureDetector(
                       onTap: widget.onTap,
                       child: const Text(
-                        'Register Now',
+                        'همین حالا ثبت نام کنید!',
                         style: TextStyle(
                           color: Colors.grey,
                           fontWeight: FontWeight.bold,

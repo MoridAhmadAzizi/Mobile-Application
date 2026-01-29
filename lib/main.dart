@@ -25,8 +25,7 @@ void main() async {
   Get.put<ObjectBoxApp>(ob);
   
   Get.put(ProductRepo());
-  runApp(
-  const MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -41,20 +40,65 @@ class MyApp extends StatelessWidget {
       child: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) {}
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return MaterialApp(
+          // تابع کمکی برای ایجاد MaterialApp با RTL
+          MaterialApp createRtlMaterialApp({Widget? home, GoRouter? router}) {
+            if (router != null) {
+              return MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                title: 'Wahab',
+                routerConfig: router,
                 theme: ThemeData(
-            fontFamily: 'Vazirmatn',
+                  fontFamily: 'Vazirmatn',
+                ),
+                // تنظیمات RTL
+                locale: const Locale('fa', 'IR'),
+                builder: (context, child) {
+                  return Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: child!,
+                  );
+                },
+              );
+            } else {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: 'Wahab',
+                home: home,
+                theme: ThemeData(
+                  fontFamily: 'Vazirmatn',
+                ),
+                // تنظیمات RTL
+                locale: const Locale('fa', 'IR'),
+                builder: (context, child) {
+                  return Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: child!,
+                  );
+                },
+              );
+            }
+          }
+
+          if (snapshot.hasError) {
+            return createRtlMaterialApp(
+              home: const Scaffold(
+                body: Center(
+                  child: Text('خطا در ارتباط با سرور'),
+                ),
               ),
-              home:
-               const Scaffold(
+            );
+          }
+          
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return createRtlMaterialApp(
+              home: const Scaffold(
                 body: Center(
                   child: CircularProgressIndicator(),
                 ),
               ),
             );
           }
+          
           if (snapshot.hasData) {
             final GoRouter router = GoRouter(
               routes: [
@@ -81,15 +125,10 @@ class MyApp extends StatelessWidget {
                 ),
               ],
             );
-            return MaterialApp.router(
-              debugShowCheckedModeBanner: false,
-              title: 'Flutter Demo',
-              routerConfig: router,
-            );
+            return createRtlMaterialApp(router: router);
           } else {
-            return const MaterialApp(
-              debugShowCheckedModeBanner: false,
-              home: LoginOrRegister(),
+            return createRtlMaterialApp(
+              home: const LoginOrRegister(),
             );
           }
         },
