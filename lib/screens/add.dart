@@ -1,13 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:wahab/model/product.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wahab/services/auth_cubit.dart';
-import 'package:wahab/services/product_cubit.dart';
-import 'package:wahab/services/product_repo.dart';
+import 'package:get/get.dart';
+
+import '../controllers/product_controller.dart';
+import '../model/product.dart';
 
 class Add extends StatefulWidget {
   final Product? initialProduct;
@@ -32,7 +30,6 @@ class _AddState extends State<Add> {
 
   bool _isSaving = false;
 
-  // ✅ ریست کامل فرم (برای Cancel مخصوصاً)
   void _resetForm() {
     _nameController.clear();
     _descriptionController.clear();
@@ -43,9 +40,6 @@ class _AddState extends State<Add> {
     _selectedGroup = 'گروپ اول';
   }
 
-  // ----------------------------
-  // Images
-  // ----------------------------
   Future<void> _pickImages() async {
     final List<XFile> images = await _picker.pickMultiImage();
     if (images.isEmpty) return;
@@ -69,44 +63,66 @@ class _AddState extends State<Add> {
     });
   }
 
-  String _normalizeFilePath(String path) {
-    if (path.startsWith('file://')) return path.replaceFirst('file://', '');
-    return path;
-  }
+  bool _isRemote(String s) => s.startsWith('http://') || s.startsWith('https://');
 
   Widget _buildImageThumb(String path) {
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return Image.network(path, fit: BoxFit.cover);
-    }
+    final pc = Get.find<ProductController>();
+
     if (path.startsWith('assets/')) {
       return Image.asset(path, fit: BoxFit.cover);
     }
-    return Image.file(File(_normalizeFilePath(path)), fit: BoxFit.cover);
+
+    if (_isRemote(path)) {
+      final cached = pc.cachedBytes(path);
+      if (cached != null) {
+        return Image.memory(cached, fit: BoxFit.cover);
+      }
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+      );
+    }
+
+    final normalized = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+
+    // ✅ اگر فایل لوکال وجود نداشت، از کش بزن
+    if (!File(normalized).existsSync()) {
+      final cached = pc.cachedBytes(path);
+      if (cached != null) {
+        return Image.memory(cached, fit: BoxFit.cover);
+      }
+      return const Icon(Icons.broken_image);
+    }
+
+    return Image.file(
+      File(normalized),
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+    );
   }
 
-  // ----------------------------
-  // Tags
-  // ----------------------------
   void _addTag() {
-    if (_tagInput.trim().isNotEmpty) {
-      setState(() {
-        _tags.add(_tagInput.trim());
-        _tagInput = '';
-        _tagController.clear();
-      });
-    }
+    final t = _tagInput.trim();
+    if (t.isEmpty) return;
+    if (_tags.contains(t)) return;
+    setState(() {
+      _tags.add(t);
+      _tagController.clear();
+      _tagInput = '';
+    });
   }
 
   void _removeTag(int index) {
     setState(() {
-      _tags.removeAt(index);
+      if (index >= 0 && index < _tags.length) _tags.removeAt(index);
     });
   }
 
-  void _showMessage(String message, {bool success = true}) {
+  void _showMessage(String msg, {required bool success}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(msg),
         backgroundColor: success ? Colors.green.shade600 : Colors.red.shade600,
       ),
     );
@@ -124,19 +140,6 @@ class _AddState extends State<Add> {
       return;
     }
 
-    final isOnline = context.read<ProductCubit>().state.isOnline;
-    if (!isOnline) {
-      _showMessage('برای افزودن/ویرایش باید آنلاین باشید.', success: false);
-      return;
-    }
-
-    final session = context.read<AuthCubit>().state.session;
-    final userId = session?.user.id;
-    if (userId == null) {
-      _showMessage('ابتدا وارد حساب شوید.', success: false);
-      return;
-    }
-
     setState(() => _isSaving = true);
 
     try {
@@ -147,29 +150,20 @@ class _AddState extends State<Add> {
         title: name,
         group: _selectedGroup,
         desc: desc,
-        tool: List<String>.from(_tags),
-        imageURL: _imagePaths.isNotEmpty
-            ? List<String>.from(_imagePaths)
-            : ['assets/images/product.png'],
+        tools: List<String>.from(_tags),
+        imagePaths: _imagePaths.isNotEmpty ? List<String>.from(_imagePaths) : const ['assets/images/product.png'],
+        createdAt: widget.initialProduct?.createdAt,
+        updatedAt: widget.initialProduct?.updatedAt,
       );
 
-      final repo = context.read<ProductRepo>();
+      final pc = Get.find<ProductController>();
+      await pc.upsert(product);
 
-      if (isEdit) {
-        await repo.updateProduct(product: product, userId: userId);
-        if (!mounted) return;
-        _showMessage("محصول موفقانه ویرایش شد!", success: true);
-        await Future.delayed(const Duration(milliseconds: 300));
-        if (!mounted) return;
-        context.pop("updated");
-      } else {
-        await repo.addProduct(draft: product, userId: userId);
-        if (!mounted) return;
-        _showMessage("محصول موفقانه اضافه شد!", success: true);
-        await Future.delayed(const Duration(milliseconds: 300));
-        if (!mounted) return;
-        context.pop("added");
-      }
+      if (!mounted) return;
+      _showMessage(isEdit ? "محصول موفقانه ویرایش شد!" : "محصول موفقانه اضافه شد!", success: true);
+      await Future.delayed(const Duration(milliseconds: 250));
+      if (!mounted) return;
+      Get.back(result: isEdit ? "updated" : "added");
     } catch (e) {
       if (!mounted) return;
       _showMessage("Failed: $e", success: false);
@@ -182,7 +176,6 @@ class _AddState extends State<Add> {
   void initState() {
     super.initState();
 
-    // Update mode: preload fields
     if (widget.initialProduct != null) {
       final p = widget.initialProduct!;
       _nameController.text = p.title;
@@ -190,16 +183,15 @@ class _AddState extends State<Add> {
 
       _tags
         ..clear()
-        ..addAll(p.tool);
+        ..addAll(p.tools);
 
       _descriptionController.text = p.desc;
 
-      _imagePaths = List<String>.from(p.imageURL);
+      _imagePaths = List<String>.from(p.imagePaths);
       if (_imagePaths.length > 10) {
         _imagePaths = _imagePaths.take(10).toList();
       }
     } else {
-      // ✅ اگر حالت افزودن جدید باشد، مطمئن شو فرم تمیز است
       _resetForm();
     }
   }
@@ -222,11 +214,7 @@ class _AddState extends State<Add> {
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           isEdit ? 'ویرایش محصول' : 'محصول جدید',
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white),
         ),
         centerTitle: true,
       ),
@@ -288,17 +276,10 @@ class _AddState extends State<Add> {
             children: [
               const Text(
                 'عکس ها',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black87,
-                ),
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.black87),
               ),
               const Spacer(),
-              Text(
-                '${_imagePaths.length}/10',
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
+              Text('${_imagePaths.length}/10', style: const TextStyle(color: Colors.grey, fontSize: 12)),
               const SizedBox(width: 10),
               ElevatedButton.icon(
                 onPressed: (_imagePaths.length >= 10) ? null : _pickImages,
@@ -308,15 +289,8 @@ class _AddState extends State<Add> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
                 ),
-                icon: const Icon(
-                  Icons.add_photo_alternate_outlined,
-                  size: 18,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  _imagePaths.isEmpty ? 'انتخاب' : 'افزودن',
-                  style: const TextStyle(color: Colors.white),
-                ),
+                icon: const Icon(Icons.add_photo_alternate_outlined, size: 18, color: Colors.white),
+                label: Text(_imagePaths.isEmpty ? 'انتخاب' : 'افزودن', style: const TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -336,10 +310,7 @@ class _AddState extends State<Add> {
                   children: [
                     Icon(Icons.cloud_upload_outlined, size: 42, color: Colors.grey),
                     SizedBox(height: 10),
-                    Text(
-                      'حد مجاز برای انتخاب عکس الی 10 عدد.',
-                      style: TextStyle(color: Colors.grey),
-                    ),
+                    Text('حد مجاز برای انتخاب عکس الی 10 عدد.', style: TextStyle(color: Colors.grey)),
                   ],
                 ),
               ),
@@ -376,15 +347,8 @@ class _AddState extends State<Add> {
                               borderRadius: BorderRadius.circular(999),
                               child: Container(
                                 padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.65),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.close,
-                                  size: 16,
-                                  color: Colors.white,
-                                ),
+                                decoration: BoxDecoration(color: Colors.black.withOpacity(0.65), shape: BoxShape.circle),
+                                child: const Icon(Icons.close, size: 16, color: Colors.white),
                               ),
                             ),
                           ),
@@ -410,14 +374,7 @@ class _AddState extends State<Add> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87)),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -431,10 +388,7 @@ class _AddState extends State<Add> {
             decoration: InputDecoration(
               hintText: hint,
               prefixIcon: Icon(icon, color: Colors.grey),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7),
-                borderSide: BorderSide.none,
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(7), borderSide: BorderSide.none),
               filled: true,
               fillColor: Colors.white,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -449,14 +403,7 @@ class _AddState extends State<Add> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'گروپ',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
+        const Text('گروپ', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87)),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -474,10 +421,7 @@ class _AddState extends State<Add> {
             items: _groups.map((String group) {
               return DropdownMenuItem<String>(
                 value: group,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(group),
-                ),
+                child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: Text(group)),
               );
             }).toList(),
             onChanged: (newValue) {
@@ -495,14 +439,7 @@ class _AddState extends State<Add> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'ابزار و آلات',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
+        const Text('ابزار و آلات', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87)),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -520,10 +457,7 @@ class _AddState extends State<Add> {
                   decoration: InputDecoration(
                     hintText: 'ابزار مورد نظر را وارد کنید.',
                     prefixIcon: const Icon(Icons.tag, color: Colors.grey),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7),
-                      borderSide: BorderSide.none,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(7), borderSide: BorderSide.none),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -533,14 +467,8 @@ class _AddState extends State<Add> {
             ),
             const SizedBox(width: 12),
             Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade800,
-                borderRadius: BorderRadius.circular(7),
-              ),
-              child: IconButton(
-                onPressed: _addTag,
-                icon: const Icon(Icons.add, color: Colors.white),
-              ),
+              decoration: BoxDecoration(color: Colors.grey.shade800, borderRadius: BorderRadius.circular(7)),
+              child: IconButton(onPressed: _addTag, icon: const Icon(Icons.add, color: Colors.white)),
             ),
           ],
         ),
@@ -552,26 +480,13 @@ class _AddState extends State<Add> {
             children: List.generate(_tags.length, (index) {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(7),
-                ),
+                decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(7)),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      _tags[index],
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                      ),
-                    ),
+                    Text(_tags[index], style: TextStyle(color: Colors.grey[800], fontWeight: FontWeight.w800, fontSize: 16)),
                     const SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: () => _removeTag(index),
-                      child: Icon(Icons.close, size: 16, color: Colors.grey[900]),
-                    ),
+                    GestureDetector(onTap: () => _removeTag(index), child: Icon(Icons.close, size: 16, color: Colors.grey[900])),
                   ],
                 ),
               );
@@ -588,11 +503,7 @@ class _AddState extends State<Add> {
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withAlpha(80),
-            blurRadius: 10,
-            offset: const Offset(0, -1),
-          ),
+          BoxShadow(color: Colors.grey.withAlpha(80), blurRadius: 10, offset: const Offset(0, -1)),
         ],
       ),
       child: Row(
@@ -602,23 +513,15 @@ class _AddState extends State<Add> {
               onPressed: _isSaving
                   ? null
                   : () {
-                      // ✅ پاک کردن کامل فیلدها روی Cancel
                       setState(() => _resetForm());
-                      context.pop('cancelled');
+                      Get.back(result: 'cancelled');
                     },
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
                 side: BorderSide(color: Colors.grey.shade300),
               ),
-              child: const Text(
-                'لغو کردن',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
+              child: const Text('لغو کردن', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87)),
             ),
           ),
           const SizedBox(width: 10),
@@ -639,11 +542,7 @@ class _AddState extends State<Add> {
                     )
                   : Text(
                       isEdit ? 'آپدیت محصول' : 'افزودن محصول',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                     ),
             ),
           ),

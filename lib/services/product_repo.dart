@@ -1,22 +1,26 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:objectbox/objectbox.dart' as obx;
-import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:wahab/model/product.dart';
-import 'package:wahab/objectbox.g.dart';
-import 'package:wahab/objectbox/objectbox.dart';
-import 'package:wahab/objectbox/product_entity.dart';
-import 'package:wahab/objectbox/product_image_entity.dart';
-import 'package:wahab/services/image_utils.dart';
-import 'package:wahab/supabase_config.dart';
 
-/// ریپو برای محصولات: Sync با Supabase + کش آفلاین در ObjectBox
+import '../model/product.dart';
+import '../objectbox/objectbox.dart';
+import '../objectbox/product_entity.dart';
+import '../objectbox/product_image_entity.dart';
+import '../supabase_config.dart';
+import '../utils/image_utils.dart';
+import '../objectbox.g.dart';
+
+/// ریپو برای محصولات:
+/// - آنلاین: Supabase (products + Storage)
+/// - آفلاین: ObjectBox (products + bytes تصاویر)
+/// - سینک: وقتی آنلاین شد، رکوردهای isDirty را به Supabase می‌فرستد.
 class ProductRepo {
   ProductRepo({
     required SupabaseClient client,
@@ -48,7 +52,9 @@ class ProductRepo {
   void _setOnlineFromResults(List<ConnectivityResult> results) {
     final online = !results.contains(ConnectivityResult.none);
     isOnline.value = online;
+
     if (online) {
+      unawaited(syncPendingToRemote());
       unawaited(syncFromRemote());
       _startRealtime();
     } else {
@@ -61,32 +67,39 @@ class ProductRepo {
   // -------------------------
   Stream<List<Product>> watchProducts() {
     return _ob.watchAllProducts().map((entities) {
-      return entities.map((e) => e.toProduct()).toList();
+      // جدیدترین اول: createdAtMs desc
+      final list = [...entities];
+      list.sort((a, b) => (b.createdAtMs ?? 0).compareTo(a.createdAtMs ?? 0));
+      return list.map((e) => e.toProduct()).toList();
     });
   }
 
   // -------------------------
-  // Remote sync
+  // Remote sync (download)
   // -------------------------
   Future<void> syncFromRemote() async {
     try {
       final data = await _client
           .from('products')
-          .select('id,title,group,desc,tool,image_urls,created_at,updated_at')
+          // group یک keyword است، پس در select با کوتیشن می‌آوریم
+          .select('id,title,description,"group",tools,image_paths,created_at,updated_at')
           .order('created_at', ascending: false);
 
       final products = (data as List)
           .cast<Map<String, dynamic>>()
-          .map((row) => Product.fromJson({
-                ...row,
-                'imageURL': row['image_urls'],
-              }))
+          .map(Product.fromDb)
           .toList();
 
       _ob.store.runInTransaction(obx.TxMode.write, () {
+        // رکوردهای dirty را نگه دار
+        final dirty = _ob.productBox.query(ProductEntity_.isDirty.equals(true)).build().find();
         _ob.productBox.removeAll();
+
         for (final p in products) {
-          _ob.productBox.put(ProductEntity.fromProduct(p));
+          _ob.productBox.put(ProductEntity.fromProduct(p, isDirty: false));
+        }
+        for (final d in dirty) {
+          _ob.productBox.put(d);
         }
       });
 
@@ -95,7 +108,7 @@ class ProductRepo {
         await _cacheImagesForProduct(p);
       }
     } catch (_) {
-      // silent: offline / transient
+      // silent
     }
   }
 
@@ -107,10 +120,7 @@ class ProductRepo {
           event: PostgresChangeEvent.all,
           schema: 'public',
           table: 'products',
-          callback: (payload) {
-            // برای سادگی: هر تغییر -> sync کامل
-            unawaited(syncFromRemote());
-          },
+          callback: (_) => unawaited(syncFromRemote()),
         )
         .subscribe();
   }
@@ -124,97 +134,134 @@ class ProductRepo {
   }
 
   // -------------------------
-  // CRUD
+  // CRUD (offline-first)
   // -------------------------
-  void offlineError(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('شما آفلاین هستید! لطفاً اینترنت را روشن کنید.'),
-        backgroundColor: Colors.red.shade600,
-      ),
-    );
+
+  String _genLocalId() {
+    final r = Random().nextInt(999999);
+    return 'local_${DateTime.now().millisecondsSinceEpoch}_$r';
   }
 
-  Future<Product> addProduct({
-    required Product draft,
-    required String userId,
-  }) async {
-    // 1) Insert product (without images) to get id
+  /// ایجاد/ویرایش محصول:
+  /// - اگر آفلاین هستیم => فقط در ObjectBox ذخیره می‌شود (isDirty=true)
+  /// - اگر آنلاین هستیم => به Supabase می‌رود و سپس کش آپدیت می‌شود.
+  Future<Product> upsert(Product draft) async {
+    final user = _client.auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    if (!isOnline.value) {
+      // offline save
+      final localId = draft.id.isEmpty ? _genLocalId() : draft.id;
+      final now = DateTime.now();
+      final offlineProduct = draft.copyWith(
+        id: localId,
+        createdAt: draft.createdAt ?? now,
+        updatedAt: now,
+      );
+      _upsertLocalCache(offlineProduct, isDirty: true);
+
+      // cache local images bytes (from file) for offline viewing on this device
+      await _cacheLocalImagesBytes(offlineProduct.imagePaths);
+
+      return offlineProduct;
+    }
+
+    // online
+    if (draft.id.startsWith('local_') || draft.id.isEmpty) {
+      return _insertRemote(draft, user.id);
+    }
+    return _updateRemote(draft, user.id);
+  }
+
+  Future<Product> _insertRemote(Product draft, String userId) async {
+    // 1) Insert row (without images) => get uuid
     final inserted = await _client
         .from('products')
         .insert({
           'title': draft.title,
+          'description': draft.desc,
           'group': draft.group,
-          'desc': draft.desc,
-          'tool': draft.tool,
-          'image_urls': <String>[],
-          'created_by': userId,
+          'tools': draft.tools,
+          'image_paths': <String>[],
+          // owner_id توسط trigger set_owner_id() پر می‌شود
         })
-        .select('id,title,group,desc,tool,image_urls,created_at,updated_at')
+        .select('id,title,description,"group",tools,image_paths,created_at,updated_at')
         .single();
 
     final productId = inserted['id'].toString();
 
-    // 2) Upload images
+    // 2) Upload images (if any local)
     final urls = await _uploadImagesIfNeeded(
       productId: productId,
       userId: userId,
-      images: draft.imageURL,
+      images: draft.imagePaths,
     );
 
     // 3) Update row with image urls
     final updatedRow = await _client
         .from('products')
-        .update({
-          'image_urls': urls,
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
-        })
+        .update({'image_paths': urls})
         .eq('id', productId)
-        .select('id,title,group,desc,tool,image_urls,created_at,updated_at')
+        .select('id,title,description,"group",tools,image_paths,created_at,updated_at')
         .single();
 
-    final product = Product.fromJson({
-      ...updatedRow,
-      'imageURL': updatedRow['image_urls'],
-    });
+    final product = Product.fromDb(updatedRow);
 
-    _upsertLocalCache(product);
+    _upsertLocalCache(product, isDirty: false);
     await _cacheImagesForProduct(product);
     return product;
   }
 
-  Future<Product> updateProduct({
-    required Product product,
-    required String userId,
-  }) async {
+  Future<Product> _updateRemote(Product product, String userId) async {
     final urls = await _uploadImagesIfNeeded(
       productId: product.id,
       userId: userId,
-      images: product.imageURL,
+      images: product.imagePaths,
     );
 
     final row = await _client
         .from('products')
         .update({
           'title': product.title,
+          'description': product.desc,
           'group': product.group,
-          'desc': product.desc,
-          'tool': product.tool,
-          'image_urls': urls,
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
+          'tools': product.tools,
+          'image_paths': urls,
         })
         .eq('id', product.id)
-        .select('id,title,group,desc,tool,image_urls,created_at,updated_at')
+        .select('id,title,description,"group",tools,image_paths,created_at,updated_at')
         .single();
 
-    final updated = Product.fromJson({
-      ...row,
-      'imageURL': row['image_urls'],
-    });
+    final updated = Product.fromDb(row);
 
-    _upsertLocalCache(updated);
+    _upsertLocalCache(updated, isDirty: false);
     await _cacheImagesForProduct(updated);
     return updated;
+  }
+
+  /// سینک رکوردهای آفلاین/dirty به Supabase (best-effort)
+  Future<void> syncPendingToRemote() async {
+    if (!isOnline.value) return;
+    final user = _client.auth.currentUser;
+    if (user == null) return;
+
+    final q = _ob.productBox.query(ProductEntity_.isDirty.equals(true)).build();
+    final dirty = q.find();
+    q.close();
+
+    for (final e in dirty) {
+      try {
+        final p = e.toProduct();
+        final synced = await upsert(p);
+        // اگر id عوض شد (local -> uuid)، entity را جایگزین کن
+        if (synced.id != e.id) {
+          _ob.productBox.remove(e.obId);
+        }
+        _upsertLocalCache(synced, isDirty: false);
+      } catch (_) {
+        // ignore and try later
+      }
+    }
   }
 
   // -------------------------
@@ -233,7 +280,7 @@ class ProductRepo {
     for (var i = 0; i < images.length; i++) {
       final img = images[i];
       if (img.isEmpty) continue;
-      if (img.startsWith('assets/')) continue; // assets را آپلود نمی‌کنیم
+      if (img.startsWith('assets/')) continue;
       if (_isRemoteUrl(img)) {
         out.add(img);
         continue;
@@ -241,9 +288,10 @@ class ProductRepo {
 
       // local file -> compress -> upload
       final normalized = img.startsWith('file://') ? img.replaceFirst('file://', '') : img;
+      if (!File(normalized).existsSync()) continue;
+
       final bytes = await ImageUtils.compressToJpegBytes(normalized);
-      final ext = '.jpg';
-      final path = '$userId/$productId/${DateTime.now().millisecondsSinceEpoch}_$i$ext';
+      final path = '$userId/$productId/${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
 
       await storage.uploadBinary(
         path,
@@ -258,7 +306,7 @@ class ProductRepo {
       final publicUrl = storage.getPublicUrl(path);
       out.add(publicUrl);
 
-      // cache bytes locally in objectbox
+      // cache bytes locally
       _upsertImageCache(publicUrl, bytes);
     }
 
@@ -266,9 +314,9 @@ class ProductRepo {
   }
 
   Future<void> _cacheImagesForProduct(Product p) async {
-    // فقط برای URLهای remote
-    for (final url in p.imageURL) {
+    for (final url in p.imagePaths) {
       if (!_isRemoteUrl(url)) continue;
+
       final existing = _findImageCache(url);
       if (existing != null) continue;
 
@@ -277,22 +325,36 @@ class ProductRepo {
         if (resp.statusCode == 200) {
           _upsertImageCache(url, resp.bodyBytes);
         }
-      } catch (_) {
-        // ignore
-      }
+      } catch (_) {}
     }
   }
 
-  ProductImageEntity? _findImageCache(String remoteUrl) {
-    final q = _ob.imageBox.query(ProductImageEntity_.remoteUrl.equals(remoteUrl)).build();
+  Future<void> _cacheLocalImagesBytes(List<String> paths) async {
+    for (final path in paths) {
+      if (_isRemoteUrl(path)) continue;
+      final normalized = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+      if (!File(normalized).existsSync()) continue;
+
+      final existing = _findImageCache(path);
+      if (existing != null) continue;
+
+      try {
+        final bytes = await ImageUtils.compressToJpegBytes(normalized);
+        _upsertImageCache(path, bytes);
+      } catch (_) {}
+    }
+  }
+
+  ProductImageEntity? _findImageCache(String key) {
+    final q = _ob.imageBox.query(ProductImageEntity_.key.equals(key)).build();
     final found = q.findFirst();
     q.close();
     return found;
   }
 
-  void _upsertImageCache(String remoteUrl, Uint8List bytes) {
-    final existing = _findImageCache(remoteUrl);
-    final e = ProductImageEntity(remoteUrl: remoteUrl, bytes: bytes);
+  void _upsertImageCache(String key, Uint8List bytes) {
+    final existing = _findImageCache(key);
+    final e = ProductImageEntity(key: key, bytes: bytes);
     if (existing != null) {
       e.obId = existing.obId;
     }
@@ -300,16 +362,16 @@ class ProductRepo {
   }
 
   /// برای UI: اگر در ObjectBox کش هست bytes را بده
-  Uint8List? getCachedBytes(String remoteUrl) {
-    return _findImageCache(remoteUrl)?.bytes;
+  Uint8List? getCachedBytes(String key) {
+    return _findImageCache(key)?.bytes;
   }
 
-  void _upsertLocalCache(Product product) {
-    final q = _ob.productBox.query(ProductEntity_.firebaseId.equals(product.id)).build();
+  void _upsertLocalCache(Product product, {required bool isDirty}) {
+    final q = _ob.productBox.query(ProductEntity_.id.equals(product.id)).build();
     final existing = q.findFirst();
     q.close();
 
-    final entity = ProductEntity.fromProduct(product);
+    final entity = ProductEntity.fromProduct(product, isDirty: isDirty);
     if (existing != null) {
       entity.obId = existing.obId;
     }

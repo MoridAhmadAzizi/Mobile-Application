@@ -1,25 +1,24 @@
 class Profile {
   final String id;
   final String email;
-  final String role;
   final bool isActive;
+
+  /// role exists in DB, but app logic no longer uses it.
+  final String? role;
 
   const Profile({
     required this.id,
     required this.email,
-    required this.role,
     required this.isActive,
+    this.role,
   });
-  String get roleNormalized => role.trim().toLowerCase();
-  bool get isSuperAdmin => roleNormalized == 'super_admin';
-  bool get isAdmin => roleNormalized == 'admin' || roleNormalized == 'super_admin';
 
   factory Profile.fromJson(Map<String, dynamic> map) {
     return Profile(
       id: (map['id'] ?? '').toString(),
       email: (map['email'] ?? '').toString().trim().toLowerCase(),
-      role: (map['role'] ?? 'user').toString().trim().toLowerCase(),
       isActive: (map['is_active'] ?? true) == true,
+      role: map['role']?.toString(),
     );
   }
 }

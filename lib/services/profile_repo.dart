@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:wahab/model/profile.dart';
+import '../model/profile.dart';
 
 class ProfileRepo {
   ProfileRepo(this._client);
@@ -19,24 +19,20 @@ class ProfileRepo {
     return Profile.fromJson(res);
   }
 
-  /// ساخت پروفایل اگر وجود ندارد (پس از verify OTP)
-  Future<void> ensureProfile({String? role}) async {
+  /// ساخت پروفایل اگر وجود ندارد (برای عبور از policy های products).
+  /// نقش (role) را دیگر در اپ استفاده نمی‌کنیم، ولی ستونش در DB وجود دارد.
+  Future<void> ensureProfile() async {
     final user = _client.auth.currentUser;
     if (user == null) return;
 
-    final existing = await _client
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .maybeSingle();
-
+    final existing = await _client.from('profiles').select('id').eq('id', user.id).maybeSingle();
     if (existing != null) return;
 
     await _client.from('profiles').insert({
       'id': user.id,
       'email': user.email,
-      'role': role ?? 'user',
       'is_active': true,
+      // role را نزنیم تا default خود DB اعمال شود
     });
   }
 }

@@ -1,15 +1,23 @@
 class Product {
+  /// DB id (uuid). For offline drafts, we use ids like `local_<millis>_<rand>`.
   final String id;
+
   final String title;
+
+  /// `group` column in Supabase (quoted in SQL).
   final String group;
+
+  /// `description` column in Supabase.
   final String desc;
-  final List<String> tool;
-  final List<String> imageURL;
 
-  /// Automatically set by DB (Supabase).
+  /// `tools` column in Supabase.
+  final List<String> tools;
+
+  /// Public URLs (online) or local file paths (offline drafts).
+  /// In Supabase the column is `image_paths`.
+  final List<String> imagePaths;
+
   final DateTime? createdAt;
-
-  /// Null means never edited after creation.
   final DateTime? updatedAt;
 
   const Product({
@@ -17,18 +25,19 @@ class Product {
     required this.title,
     required this.group,
     required this.desc,
-    required this.tool,
-    required this.imageURL,
+    required this.tools,
+    required this.imagePaths,
     this.createdAt,
     this.updatedAt,
   });
+
   Product copyWith({
     String? id,
     String? title,
     String? group,
     String? desc,
-    List<String>? tool,
-    List<String>? imageURL,
+    List<String>? tools,
+    List<String>? imagePaths,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -37,43 +46,42 @@ class Product {
       title: title ?? this.title,
       group: group ?? this.group,
       desc: desc ?? this.desc,
-      tool: tool ?? this.tool,
-      imageURL: imageURL ?? this.imageURL,
+      tools: tools ?? this.tools,
+      imagePaths: imagePaths ?? this.imagePaths,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
   static DateTime? _parseDate(dynamic v) {
     if (v == null) return null;
     if (v is DateTime) return v;
-    final s = v.toString();
-    return DateTime.tryParse(s);
-  }
-  factory Product.fromMap(Map<String, dynamic> map) => Product.fromJson(map);
-  Map<String, dynamic> toMap() => toJson();
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'group': group,
-      'desc': desc,
-      'tool': tool,
-      'imageURL': imageURL,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
-    };
+    return DateTime.tryParse(v.toString());
   }
 
-  factory Product.fromJson(Map<String, dynamic> map) {
+  /// Map from Supabase row -> Product.
+  factory Product.fromDb(Map<String, dynamic> row) {
     return Product(
-      id: (map['id'] ?? '').toString(),
-      title: (map['title'] ?? '').toString(),
-      group: (map['group'] ?? '').toString(),
-      desc: (map['desc'] ?? '').toString(),
-      tool: List<String>.from(map['tool'] ?? const []),
-      imageURL: List<String>.from(map['imageURL'] ?? map['image_urls'] ?? const []),
-      createdAt: _parseDate(map['created_at']),
-      updatedAt: _parseDate(map['updated_at']),
+      id: (row['id'] ?? '').toString(),
+      title: (row['title'] ?? '').toString(),
+      group: (row['group'] ?? '').toString(),
+      desc: (row['description'] ?? '').toString(),
+      tools: List<String>.from(row['tools'] ?? const <String>[]),
+      imagePaths: List<String>.from(row['image_paths'] ?? const <String>[]),
+      createdAt: _parseDate(row['created_at']),
+      updatedAt: _parseDate(row['updated_at']),
     );
+  }
+
+  /// Map for Supabase insert/update.
+  /// NOTE: do NOT send owner_id; triggers set/lock it.
+  Map<String, dynamic> toDb() {
+    return {
+      'title': title,
+      'description': desc,
+      'group': group,
+      'tools': tools,
+      'image_paths': imagePaths,
+    };
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:wahab/objectbox.g.dart';
-import 'package:wahab/objectbox/product_entity.dart';
-import 'package:wahab/objectbox/product_image_entity.dart';
+import 'product_entity.dart';
+import 'product_image_entity.dart';
 
 class ObjectBoxApp {
   final Store store;
@@ -17,6 +17,7 @@ class ObjectBoxApp {
     final store = await openStore();
     return ObjectBoxApp._(store);
   }
+
   Stream<List<ProductEntity>> watchAllProducts() {
     final controller = StreamController<List<ProductEntity>>();
     Query<ProductEntity>? q;

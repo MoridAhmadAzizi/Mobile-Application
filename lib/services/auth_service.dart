@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
+
 class AuthService {
   AuthService(this._client);
 
@@ -34,7 +35,6 @@ class AuthService {
     );
   }
 
-  /// ارسال مجدد OTP (Signup)
   Future<void> resendSignupOtp({
     required String email,
   }) async {

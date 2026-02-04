@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-
-import 'package:wahab/services/auth_services.dart';
+import 'package:get/get.dart';
+import 'package:wahab/services/auth_service.dart';
 import 'package:wahab/services/profile_repo.dart';
 
 class OtpPage extends StatefulWidget {
@@ -66,7 +64,7 @@ class _OtpPageState extends State<OtpPage> {
     });
 
     try {
-      await context.read<AuthService>().resendSignupOtp(email: widget.email);
+      await Get.find<AuthService>().resendSignupOtp(email: widget.email);
       if (!mounted) return;
       _snack('کد جدید ارسال شد  (فقط آخرین کد معتبر است)', ok: true);
       _clearFields();
@@ -139,15 +137,15 @@ class _OtpPageState extends State<OtpPage> {
 
     setState(() => _loading = true);
     try {
-      await context.read<AuthService>().verifySignupOtp(email: widget.email, token: code);
+      await Get.find<AuthService>().verifySignupOtp(email: widget.email, token: code);
 
       // اگر پروفایل نبود بساز
-      await context.read<ProfileRepo>().ensureProfile();
+      await Get.find<ProfileRepo>().ensureProfile();
 
       if (!mounted) return;
       _snack('تایید شد. ', ok: true);
 
-      context.go('/');
+      Get.offAllNamed('/');
     } catch (e) {
       if (!mounted) return;
       _snack('کد اشتباه است یا منقضی/باطل شده.');

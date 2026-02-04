@@ -4,7 +4,7 @@ import 'package:objectbox/objectbox.dart';
 
 /// ذخیره‌ی باینری عکس برای حالت آفلاین.
 ///
-/// - `remoteUrl` آدرس اصلی در Supabase Storage
+/// - `key` می‌تواند URL آنلاین (https://...) یا مسیر محلی (file path) باشد.
 /// - `bytes` فایل فشرده‌شده‌ی تصویر
 @Entity()
 class ProductImageEntity {
@@ -12,14 +12,13 @@ class ProductImageEntity {
   int obId;
 
   @Index()
-  String remoteUrl;
+  String key;
 
-  /// ObjectBox از Uint8List پشتیبانی می‌کند.
   Uint8List bytes;
 
   ProductImageEntity({
     this.obId = 0,
-    required this.remoteUrl,
+    required this.key,
     required this.bytes,
   });
 }
