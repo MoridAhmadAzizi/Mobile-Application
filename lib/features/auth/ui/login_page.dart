@@ -1,10 +1,6 @@
+import 'package:events/core/widgets/my_button.dart';
+import 'package:events/core/widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import '../components/my_button.dart';
-import '../components/my_text_field.dart';
-import '../services/auth_service.dart';
-import 'home.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function()? onTap;
@@ -17,7 +13,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _loading = false;
+  final bool _loading = false;
 
   @override
   void dispose() {
@@ -26,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _snack(String msg, {bool ok = false}) {
+  void snack(String msg, {bool ok = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
@@ -36,28 +32,28 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _signIn() async {
-    if (_loading) return;
-
-    final email = _emailController.text.trim();
-    final pass = _passwordController.text;
-
-    if (email.isEmpty || pass.isEmpty) {
-      _snack('ایمیل و پسورد را وارد کنید');
-      return;
-    }
-
-    setState(() => _loading = true);
-    try {
-      await Get.find<AuthService>().signInWithPassword(email: email, password: pass);
-      if (!mounted) return;
-      _snack('با موفقیت وارد شدید ', ok: true);
-      Get.offAll(() => const Home());
-    } catch (_) {
-      if (!mounted) return;
-      _snack('ورود ناموفق!');
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
+    // if (_loading) return;
+    //
+    // final email = _emailController.text.trim();
+    // final pass = _passwordController.text;
+    //
+    // if (email.isEmpty || pass.isEmpty) {
+    //   _snack('ایمیل و پسورد را وارد کنید');
+    //   return;
+    // }
+    //
+    // setState(() => _loading = true);
+    // try {
+    //   await Get.find<AuthService>().signInWithPassword(email: email, password: pass);
+    //   if (!mounted) return;
+    //   _snack('با موفقیت وارد شدید ', ok: true);
+    //   Get.offAll(() => const Home());
+    // } catch (_) {
+    //   if (!mounted) return;
+    //   _snack('ورود ناموفق!');
+    // } finally {
+    //   if (mounted) setState(() => _loading = false);
+    // }
   }
 
   @override

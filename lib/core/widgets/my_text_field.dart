@@ -23,19 +23,9 @@ class MyTextField extends StatelessWidget {
       decoration: InputDecoration(
           hintText: hintText,
           filled: true,
-          fillColor: Theme.of(context)
-              .colorScheme
-              .surfaceContainerHighest
-              .withAlpha(120),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(width: 2, color: Colors.grey[300]!)
-          ),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(width: 2, color: Colors.grey[300]!)
-          )
-      ),
+          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(120),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(width: 2, color: Colors.grey[300]!)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(width: 2, color: Colors.grey[300]!))),
     );
   }
 }

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:wahab/services/auth_service.dart';
-import 'package:wahab/services/profile_repo.dart';
 
 class OtpPage extends StatefulWidget {
   final String email;
@@ -64,7 +61,7 @@ class _OtpPageState extends State<OtpPage> {
     });
 
     try {
-      await Get.find<AuthService>().resendSignupOtp(email: widget.email);
+      // await Get.find<AuthService>().resendSignupOtp(email: widget.email);
       if (!mounted) return;
       _snack('کد جدید ارسال شد  (فقط آخرین کد معتبر است)', ok: true);
       _clearFields();
@@ -106,18 +103,6 @@ class _OtpPageState extends State<OtpPage> {
     }
   }
 
-  void _handleBackspace(RawKeyEvent event, int index) {
-    if (event.logicalKey == LogicalKeyboardKey.backspace &&
-        event is RawKeyDownEvent) {
-      if (_controllers[index].text.isEmpty && index > 0) {
-        _focusNodes[index - 1].requestFocus();
-        _controllers[index - 1].clear();
-      }
-      else if (_controllers[index].text.isNotEmpty) {
-        _controllers[index].clear();
-      }
-    }
-  }
 
   Future<void> _verify() async {
     if (_loading) return;
@@ -137,15 +122,15 @@ class _OtpPageState extends State<OtpPage> {
 
     setState(() => _loading = true);
     try {
-      await Get.find<AuthService>().verifySignupOtp(email: widget.email, token: code);
+      // await Get.find<AuthService>().verifySignupOtp(email: widget.email, token: code);
 
       // اگر پروفایل نبود بساز
-      await Get.find<ProfileRepo>().ensureProfile();
+      // await Get.find<ProfileRepo>().ensureProfile();
 
       if (!mounted) return;
       _snack('تایید شد. ', ok: true);
 
-      Get.offAllNamed('/');
+      // Get.offAllNamed('/');
     } catch (e) {
       if (!mounted) return;
       _snack('کد اشتباه است یا منقضی/باطل شده.');
@@ -156,7 +141,7 @@ class _OtpPageState extends State<OtpPage> {
     }
   }
 
-  void _handlePaste(String value) {
+  void handlePaste(String value) {
     final digitsOnly = value.replaceAll(RegExp(r'[^\d]'), '');
 
     if (digitsOnly.length >= 6) {
@@ -201,30 +186,30 @@ class _OtpPageState extends State<OtpPage> {
                 Text(
                   'کد تأیید را وارد کنید',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'کد ۶ رقمی به ایمیل زیر ارسال شد:',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
+                        color: Colors.grey.shade600,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1),
+                    color: colorScheme.primary.withAlpha(20),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
                     child: Text(
                       widget.email,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.primary,
-                      ),
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.primary,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -235,63 +220,52 @@ class _OtpPageState extends State<OtpPage> {
                   textDirection: TextDirection.ltr,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(6, (index) {
-                    return RawKeyboardListener(
-                      focusNode: FocusNode(),
-                      onKey: (RawKeyEvent event) {
-                        _handleBackspace(event, index);
-                      },
-                      child:
-                      SizedBox(
-                        width: 52,
-                        height: 60,
-                        child: TextField(
-                          controller: _controllers[index],
-                          focusNode: _focusNodes[index],
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          maxLength: 1,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          decoration: InputDecoration(
-                            counterText: '',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(9),
-                              borderSide: BorderSide(
-                                color: _controllers[index].text.isNotEmpty
-                                  ? colorScheme.primary
-                                  : Colors.grey.shade400,
-                                width: 2,
-                              ),
+                    return SizedBox(
+                      width: 52,
+                      height: 60,
+                      child: TextField(
+                        controller: _controllers[index],
+                        focusNode: _focusNodes[index],
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        maxLength: 1,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(9),
-                              borderSide: BorderSide(
-                                color: colorScheme.primary,
-                                width: 2,
-                              ),
+                        decoration: InputDecoration(
+                          counterText: '',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(9),
+                            borderSide: BorderSide(
+                              color: _controllers[index].text.isNotEmpty ? colorScheme.primary : Colors.grey.shade400,
+                              width: 2,
                             ),
-                            filled: true,
-                            fillColor: _controllers[index].text.isNotEmpty
-                                ? colorScheme.primary.withOpacity(0.05)
-                                : Colors.white,
-                            contentPadding: const EdgeInsets.all(8),
                           ),
-                          onChanged: (value) {
-                            _handleInput(value, index);
-                          },
-                          onTap: () {
-                            if (_controllers[index].text.isNotEmpty) {
-                              _controllers[index].selection = TextSelection(
-                                baseOffset: 0,
-                                extentOffset: _controllers[index].text.length,
-                              );
-                            }
-                          },
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(9),
+                            borderSide: BorderSide(
+                              color: colorScheme.primary,
+                              width: 2,
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: _controllers[index].text.isNotEmpty ? colorScheme.primary.withAlpha(1) : Colors.white,
+                          contentPadding: const EdgeInsets.all(8),
                         ),
+                        onChanged: (value) {
+                          _handleInput(value, index);
+                        },
+                        onTap: () {
+                          if (_controllers[index].text.isNotEmpty) {
+                            _controllers[index].selection = TextSelection(
+                              baseOffset: 0,
+                              extentOffset: _controllers[index].text.length,
+                            );
+                          }
+                        },
                       ),
                     );
                   }),
@@ -304,7 +278,6 @@ class _OtpPageState extends State<OtpPage> {
                   onPressed: _loading ? null : _verify,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(double.infinity, 56),
-
                   ),
                   child: _loading
                       ? const SizedBox(
@@ -323,9 +296,9 @@ class _OtpPageState extends State<OtpPage> {
                             Text(
                               'تایید کد',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ],
                         ),
@@ -348,7 +321,9 @@ class _OtpPageState extends State<OtpPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20,)
+                const SizedBox(
+                  height: 20,
+                )
               ],
             ),
           ),

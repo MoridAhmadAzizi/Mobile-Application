@@ -1,10 +1,6 @@
+import 'package:events/core/widgets/my_button.dart';
+import 'package:events/core/widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import '../components/my_button.dart';
-import '../components/my_text_field.dart';
-import '../services/auth_service.dart';
-import 'otp_page.dart';
 
 class RegisterPage extends StatefulWidget {
   final void Function()? onTap;
@@ -59,11 +55,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => _loading = true);
     try {
-      await Get.find<AuthService>().signUpAndSendOtp(email: email, password: pass);
+      // await Get.find<AuthService>().signUpAndSendOtp(email: email, password: pass);
       if (!mounted) return;
       _snack('کد تایید به ایمیل شما ارسال شد', ok: true);
-      Get.to(() => OtpPage(email: email));
-    } catch (_) {
+      // Get.to(() => OtpPage(email: email));
+    } catch (eroor) {
       if (!mounted) return;
       _snack('ثبت نام ناموفق! بعداً امتحان کنید.');
     } finally {

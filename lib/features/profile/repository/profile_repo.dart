@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../model/profile.dart';
+import 'package:events/core/model/profile.dart';
 
 class ProfileRepo {
   ProfileRepo(this._client);
@@ -9,11 +9,7 @@ class ProfileRepo {
     final user = _client.auth.currentUser;
     if (user == null) return null;
 
-    final res = await _client
-        .from('profiles')
-        .select('id,email,role,is_active')
-        .eq('id', user.id)
-        .maybeSingle();
+    final res = await _client.from('profiles').select('id,email,role,is_active').eq('id', user.id).maybeSingle();
 
     if (res == null) return null;
     return Profile.fromJson(res);

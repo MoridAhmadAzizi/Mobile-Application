@@ -1,6 +1,10 @@
-class Product {
+import 'package:objectbox/objectbox.dart';
+
+@Entity()
+class EventModel {
   /// DB id (uuid). For offline drafts, we use ids like `local_<millis>_<rand>`.
-  final String id;
+  @Id()
+  int id;
 
   final String title;
 
@@ -16,12 +20,11 @@ class Product {
   /// Public URLs (online) or local file paths (offline drafts).
   /// In Supabase the column is `image_paths`.
   final List<String> imagePaths;
-
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  const Product({
-    required this.id,
+  EventModel({
+    this.id = 0,
     required this.title,
     required this.group,
     required this.desc,
@@ -31,8 +34,8 @@ class Product {
     this.updatedAt,
   });
 
-  Product copyWith({
-    String? id,
+  EventModel copyWith({
+    int? id,
     String? title,
     String? group,
     String? desc,
@@ -41,7 +44,7 @@ class Product {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return Product(
+    return EventModel(
       id: id ?? this.id,
       title: title ?? this.title,
       group: group ?? this.group,
@@ -60,9 +63,9 @@ class Product {
   }
 
   /// Map from Supabase row -> Product.
-  factory Product.fromDb(Map<String, dynamic> row) {
-    return Product(
-      id: (row['id'] ?? '').toString(),
+  factory EventModel.fromDb(Map<String, dynamic> row) {
+    return EventModel(
+      id: row['id'],
       title: (row['title'] ?? '').toString(),
       group: (row['group'] ?? '').toString(),
       desc: (row['description'] ?? '').toString(),
