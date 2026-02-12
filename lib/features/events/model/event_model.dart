@@ -1,15 +1,27 @@
 import 'package:objectbox/objectbox.dart';
 
+enum EventType {
+  kids('نونهالان', 0),
+  teens('نوجوانان', 1);
+
+  const EventType(
+    this.name,
+    this.type,
+  );
+  final String name;
+  final int type;
+  static bool isForKids(int type) => type == EventType.kids.type;
+  static bool isForTeens(int type) => type == EventType.teens.type;
+}
+
 @Entity()
 class EventModel {
-  /// DB id (uuid). For offline drafts, we use ids like `local_<millis>_<rand>`.
-  @Id()
+  @Id(assignable: true)
   int id;
 
   final String title;
 
-  /// `group` column in Supabase (quoted in SQL).
-  final String group;
+  final int type;
 
   /// `description` column in Supabase.
   final String desc;
@@ -25,20 +37,21 @@ class EventModel {
 
   EventModel({
     this.id = 0,
-    required this.title,
-    required this.group,
-    required this.desc,
-    required this.tools,
-    required this.imagePaths,
+    this.title = '',
+    this.type = 0,
+    this.desc = '',
+    this.tools = const [],
+    this.imagePaths = const [],
     this.createdAt,
     this.updatedAt,
   });
-
+  static EventModel get empty => EventModel();
   EventModel copyWith({
     int? id,
     String? title,
     String? group,
     String? desc,
+    int? type,
     List<String>? tools,
     List<String>? imagePaths,
     DateTime? createdAt,
@@ -47,7 +60,7 @@ class EventModel {
     return EventModel(
       id: id ?? this.id,
       title: title ?? this.title,
-      group: group ?? this.group,
+      type: type ?? this.type,
       desc: desc ?? this.desc,
       tools: tools ?? this.tools,
       imagePaths: imagePaths ?? this.imagePaths,
@@ -63,26 +76,26 @@ class EventModel {
   }
 
   /// Map from Supabase row -> Product.
-  factory EventModel.fromDb(Map<String, dynamic> row) {
+  factory EventModel.formJson(Map<String, dynamic> json) {
     return EventModel(
-      id: row['id'],
-      title: (row['title'] ?? '').toString(),
-      group: (row['group'] ?? '').toString(),
-      desc: (row['description'] ?? '').toString(),
-      tools: List<String>.from(row['tools'] ?? const <String>[]),
-      imagePaths: List<String>.from(row['image_paths'] ?? const <String>[]),
-      createdAt: _parseDate(row['created_at']),
-      updatedAt: _parseDate(row['updated_at']),
+      id: json['id'],
+      title: (json['title'] ?? '').toString(),
+      type: (json['type'] ?? 0) as int,
+      desc: (json['description'] ?? '').toString(),
+      tools: List<String>.from(json['tools'] ?? const <String>[]),
+      imagePaths: List<String>.from(json['image_paths'] ?? const <String>[]),
+      createdAt: _parseDate(json['created_at']),
+      updatedAt: _parseDate(json['updated_at']),
     );
   }
 
   /// Map for Supabase insert/update.
   /// NOTE: do NOT send owner_id; triggers set/lock it.
-  Map<String, dynamic> toDb() {
+  Map<String, dynamic> toMap() {
     return {
       'title': title,
       'description': desc,
-      'group': group,
+      'type': type,
       'tools': tools,
       'image_paths': imagePaths,
     };

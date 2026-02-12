@@ -1,19 +1,23 @@
-// import 'dart:async';
-// import 'dart:io';
-// import 'dart:math';
-// import 'dart:typed_data';
-//
-// import 'package:connectivity_plus/connectivity_plus.dart';
-// import 'package:http/http.dart' as http;
-//
-// import 'package:flutter/material.dart';
-// import 'package:objectbox/objectbox.dart' as obx;
-// import 'package:supabase_flutter/supabase_flutter.dart';
-// import 'package:wahab/core/objectbox/objectbox.dart';
-// import 'package:wahab/features/events/model/event_model.dart';
-// import 'package:wahab/supabase_config.dart';
-// import 'package:wahab/utils/image_utils.dart';
-//
+import 'dart:developer' as developer;
+import 'package:events/features/events/model/event_model.dart';
+import 'package:events/objectbox.g.dart';
+
+class EventRepository {
+  const EventRepository(this.eventBox);
+  final Box<EventModel> eventBox;
+
+  List<EventModel> getActiveEvents() {
+    final query = eventBox.query().build();
+    final events = query.find();
+    query.close();
+    developer.log('data base lenght is: ${events.length}');
+    return events;
+  }
+
+  void storeEvents(List<EventModel> events) {
+    eventBox.putMany(events);
+  }
+}
 // class ProductRepo {
 //   ProductRepo({
 //     required SupabaseClient client,

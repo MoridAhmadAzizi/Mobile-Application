@@ -1,6 +1,8 @@
 import 'package:events/core/widgets/my_button.dart';
 import 'package:events/core/widgets/my_text_field.dart';
+import 'package:events/features/auth/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function()? onTap;
@@ -32,6 +34,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _signIn() async {
+    AuthService(Supabase.instance.client).signInWithPassword(email: _emailController.text, password: _passwordController.text);
     // if (_loading) return;
     //
     // final email = _emailController.text.trim();
@@ -88,8 +91,11 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     const Text('حساب ندارید؟'),
                     const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: widget.onTap,
+                    InkWell(
+                      onTap: () {
+                        final supabase = Supabase.instance.client.auth.currentUser;
+                        debugPrint('user data is: $supabase');
+                      },
                       child: Text('ثبت نام', style: TextStyle(color: Colors.blue.shade700, fontWeight: FontWeight.w800)),
                     ),
                   ],

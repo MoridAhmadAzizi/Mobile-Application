@@ -5,23 +5,18 @@
   "entities": [
     {
       "id": "1:2006261101140995514",
-      "lastPropertyId": "8:1385311369094534048",
+      "lastPropertyId": "9:2921592406769504122",
       "name": "EventModel",
       "properties": [
         {
           "id": "1:835777748264011980",
           "name": "id",
           "type": 6,
-          "flags": 1
+          "flags": 129
         },
         {
           "id": "2:3295764467579825014",
           "name": "title",
-          "type": 9
-        },
-        {
-          "id": "3:5643504947583391236",
-          "name": "group",
           "type": 9
         },
         {
@@ -48,6 +43,11 @@
           "id": "8:1385311369094534048",
           "name": "updatedAt",
           "type": 10
+        },
+        {
+          "id": "9:2921592406769504122",
+          "name": "type",
+          "type": 6
         }
       ],
       "relations": []
@@ -61,7 +61,9 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    5643504947583391236
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

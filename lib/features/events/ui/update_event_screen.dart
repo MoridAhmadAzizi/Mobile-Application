@@ -1,6 +1,6 @@
 // import 'package:flutter/material.dart';
 // import '../model/event_model.dart';
-// import 'add.dart';
+// import 'add_event_screen.dart';
 //
 // class Update extends StatelessWidget {
 //   final EventModel product;

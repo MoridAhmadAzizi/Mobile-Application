@@ -1,8 +1,9 @@
+import 'package:events/router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app_theme.dart';
-import 'core/objectbox/objectbox.dart';
-import 'features/home.dart';
+import 'core/repository/database_repository.dart';
 import 'supabase_config.dart';
 
 Future<void> main() async {
@@ -13,8 +14,7 @@ Future<void> main() async {
     anonKey: SupabaseConfig.anonKey,
   );
 
-  await ObjectBoxApp.create();
-  // final client = Supabase.instance.client;
+  final databaseRepository = await DatabaseRepository.create();
 
   // Services / Repos
   // Get.put<AuthService>(AuthService(client), permanent: true);
@@ -31,7 +31,9 @@ Future<void> main() async {
   //   permanent: true,
   // );
 
-  runApp(const MyApp());
+  runApp(MultiRepositoryProvider(
+      providers: [RepositoryProvider.value(value: databaseRepository), RepositoryProvider.value(value: databaseRepository.getEventRepository())],
+      child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -39,37 +41,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: router(),
       debugShowCheckedModeBanner: false,
       title: 'برنامه ها',
       theme: AppTheme.light(),
       locale: const Locale('fa', 'IR'),
       builder: (context, child) => Directionality(textDirection: TextDirection.rtl, child: child ?? const SizedBox()),
-      home: const _Root(),
     );
-  }
-}
-
-class _Root extends StatelessWidget {
-  const _Root();
-
-  @override
-  Widget build(BuildContext context) {
-    // final ac = Get.find<AuthController>();
-    return const Home();
-
-    //   return Obx(() {
-    //     if (ac.isLoading.value) {
-    //       return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    //     }
-    //
-    //     // اگر لاگین نیست => لاگین
-    //     if (!ac.isAuthenticated) {
-    //       return const LoginOrRegister();
-    //     }
-    //
-    //     // اگر لاگین هست => هوم
-    //     return const Home();
-    //   });
   }
 }

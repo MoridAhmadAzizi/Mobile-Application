@@ -21,24 +21,18 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(1, 2006261101140995514),
     name: 'EventModel',
-    lastPropertyId: const obx_int.IdUid(8, 1385311369094534048),
+    lastPropertyId: const obx_int.IdUid(9, 2921592406769504122),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
         id: const obx_int.IdUid(1, 835777748264011980),
         name: 'id',
         type: 6,
-        flags: 1,
+        flags: 129,
       ),
       obx_int.ModelProperty(
         id: const obx_int.IdUid(2, 3295764467579825014),
         name: 'title',
-        type: 9,
-        flags: 0,
-      ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(3, 5643504947583391236),
-        name: 'group',
         type: 9,
         flags: 0,
       ),
@@ -70,6 +64,12 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(8, 1385311369094534048),
         name: 'updatedAt',
         type: 10,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(9, 2921592406769504122),
+        name: 'type',
+        type: 6,
         flags: 0,
       ),
     ],
@@ -122,7 +122,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [],
     retiredIndexUids: const [],
-    retiredPropertyUids: const [],
+    retiredPropertyUids: const [5643504947583391236],
     retiredRelationUids: const [],
     modelVersion: 5,
     modelVersionParserMinimum: 5,
@@ -140,7 +140,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
       },
       objectToFB: (EventModel object, fb.Builder fbb) {
         final titleOffset = fbb.writeString(object.title);
-        final groupOffset = fbb.writeString(object.group);
         final descOffset = fbb.writeString(object.desc);
         final imagePathsOffset = fbb.writeList(
           object.imagePaths.map(fbb.writeString).toList(growable: false),
@@ -148,15 +147,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final toolsOffset = fbb.writeList(
           object.tools.map(fbb.writeString).toList(growable: false),
         );
-        fbb.startTable(9);
+        fbb.startTable(10);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, titleOffset);
-        fbb.addOffset(2, groupOffset);
         fbb.addOffset(3, descOffset);
         fbb.addOffset(4, imagePathsOffset);
         fbb.addOffset(5, toolsOffset);
         fbb.addInt64(6, object.createdAt?.millisecondsSinceEpoch);
         fbb.addInt64(7, object.updatedAt?.millisecondsSinceEpoch);
+        fbb.addInt64(8, object.type);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -182,9 +181,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final titleParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGet(buffer, rootOffset, 6, '');
-        final groupParam = const fb.StringReader(
-          asciiOptimization: true,
-        ).vTableGet(buffer, rootOffset, 8, '');
+        final typeParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          20,
+          0,
+        );
         final descParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGet(buffer, rootOffset, 10, '');
@@ -201,7 +203,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final object = EventModel(
           id: idParam,
           title: titleParam,
-          group: groupParam,
+          type: typeParam,
           desc: descParam,
           tools: toolsParam,
           imagePaths: imagePathsParam,
@@ -229,33 +231,33 @@ class EventModel_ {
     _entities[0].properties[1],
   );
 
-  /// See [EventModel.group].
-  static final group = obx.QueryStringProperty<EventModel>(
-    _entities[0].properties[2],
-  );
-
   /// See [EventModel.desc].
   static final desc = obx.QueryStringProperty<EventModel>(
-    _entities[0].properties[3],
+    _entities[0].properties[2],
   );
 
   /// See [EventModel.imagePaths].
   static final imagePaths = obx.QueryStringVectorProperty<EventModel>(
-    _entities[0].properties[4],
+    _entities[0].properties[3],
   );
 
   /// See [EventModel.tools].
   static final tools = obx.QueryStringVectorProperty<EventModel>(
-    _entities[0].properties[5],
+    _entities[0].properties[4],
   );
 
   /// See [EventModel.createdAt].
   static final createdAt = obx.QueryDateProperty<EventModel>(
-    _entities[0].properties[6],
+    _entities[0].properties[5],
   );
 
   /// See [EventModel.updatedAt].
   static final updatedAt = obx.QueryDateProperty<EventModel>(
+    _entities[0].properties[6],
+  );
+
+  /// See [EventModel.type].
+  static final type = obx.QueryIntegerProperty<EventModel>(
     _entities[0].properties[7],
   );
 }

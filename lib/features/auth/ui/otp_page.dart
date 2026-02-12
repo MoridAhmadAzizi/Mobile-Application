@@ -103,7 +103,6 @@ class _OtpPageState extends State<OtpPage> {
     }
   }
 
-
   Future<void> _verify() async {
     if (_loading) return;
 
