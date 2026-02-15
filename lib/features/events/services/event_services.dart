@@ -21,6 +21,4 @@ class EventServices {
     await fetchEventsFromServer();
     return eventRepository.getActiveEvents().toList();
   }
-
-
 }

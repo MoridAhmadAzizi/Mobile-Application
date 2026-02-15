@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ButtonSection extends StatelessWidget {
-  const ButtonSection({required this.title , this.onReset, this.onSubmit, this.isPosting = false, super.key});
+  const ButtonSection({required this.title, this.onReset, this.onSubmit, this.isPosting = false, super.key});
   final String title;
   final VoidCallback? onReset;
   final VoidCallback? onSubmit;
