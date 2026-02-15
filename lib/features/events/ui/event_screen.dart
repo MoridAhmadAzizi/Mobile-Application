@@ -87,7 +87,7 @@ class _EventScreenState extends State<EventScreen> {
                     // ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: TabsWidget(onNewEventAdded: () async {
+                      child: TabsWidget(onNewEventAdded: (_) async {
                         if (context.mounted) {
                           context.read<EventCubit>().reload();
                         }

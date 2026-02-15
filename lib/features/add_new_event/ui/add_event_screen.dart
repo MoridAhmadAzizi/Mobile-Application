@@ -1,3 +1,4 @@
+import 'package:events/core/extension/navigator_extension.dart';
 import 'package:events/features/add_new_event/cubit/add_event_cubit.dart';
 import 'package:events/features/add_new_event/ui/widgets/button_section.dart';
 import 'package:events/features/add_new_event/ui/widgets/event_type_selector.dart';
@@ -6,12 +7,11 @@ import 'package:events/features/add_new_event/ui/widgets/tool_selector.dart';
 import 'package:events/features/events/model/event_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 class AddEventScreen extends StatefulWidget {
-  final EventModel? initialEvent;
-  const AddEventScreen({this.onAdded, super.key, this.initialEvent});
-  final VoidCallback? onAdded;
+  const AddEventScreen({this.onAdded, super.key, this.eventToUpdate});
+  final void Function(EventModel postedEvent)? onAdded;
+  final EventModel? eventToUpdate;
 
   @override
   State<AddEventScreen> createState() => _AddEventScreenState();
@@ -20,7 +20,6 @@ class AddEventScreen extends StatefulWidget {
 class _AddEventScreenState extends State<AddEventScreen> {
   final TextEditingController _titleTextController = TextEditingController();
   final TextEditingController _descriptionTextController = TextEditingController();
-  AddEventCubit get addEventCubit => AddEventCubit(widget.initialEvent ?? EventModel.empty);
 
   void _showSnackBarMessage(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -35,8 +34,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
   void initState() {
     super.initState();
 
-    if (widget.initialEvent != null) {
-      final eventToUpdate = widget.initialEvent!;
+    if (widget.eventToUpdate != null) {
+      final eventToUpdate = widget.eventToUpdate!;
       _titleTextController.text = eventToUpdate.title;
       _descriptionTextController.text = eventToUpdate.desc;
     }
@@ -51,7 +50,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.initialEvent != null;
+    final isEditing = widget.eventToUpdate != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -62,8 +61,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
         centerTitle: true,
       ),
       backgroundColor: Colors.grey[50],
-      body: BlocProvider<AddEventCubit>.value(
-        value: addEventCubit,
+      body: BlocProvider<AddEventCubit>(
+        create: (context) => AddEventCubit(widget.eventToUpdate ?? EventModel.empty),
         child: BlocConsumer<AddEventCubit, AddEventState>(
           listener: (context, state) {
             if (state is EventAddingFailed) {
@@ -71,16 +70,15 @@ class _AddEventScreenState extends State<AddEventScreen> {
             } else {
               if (state is EventPostingSuccess) {
                 _showSnackBarMessage(state.message);
-                widget.onAdded?.call();
+                widget.onAdded?.call(state.eventModel);
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (context.mounted) {
-                    context.pop();
-                  }
+                  context.navigatorPop();
                 });
               }
             }
           },
           builder: (context, state) {
+            final addEventCubit = context.read<AddEventCubit>();
             return Stack(
               children: [
                 Positioned.fill(
@@ -121,17 +119,18 @@ class _AddEventScreenState extends State<AddEventScreen> {
                     right: 0,
                     left: 0,
                     child: ButtonSection(
-                      isEditing: isEditing,
+                      title: isEditing ? 'آپدیت برنامه' : 'افزودن برنامه',
                       isPosting: state is EventPosting || state is EventPostingSuccess,
-                      onReset: () {
-                        _titleTextController.clear();
-                        _descriptionTextController.clear();
-                        context.read<AddEventCubit>().restFrom();
-                      },
+                      onReset: isEditing
+                          ? null
+                          : () {
+                              _titleTextController.clear();
+                              _descriptionTextController.clear();
+                              addEventCubit.restFrom();
+                            },
                       onSubmit: () {
-                        context
-                            .read<AddEventCubit>()
-                            .postForm(title: _titleTextController.text, description: _descriptionTextController.text, isEditing: isEditing);
+                        addEventCubit.submitForm(
+                            title: _titleTextController.text, description: _descriptionTextController.text, isEditing: isEditing);
                       },
                     )),
               ],

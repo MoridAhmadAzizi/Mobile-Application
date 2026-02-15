@@ -1,3 +1,4 @@
+import 'package:events/core/extension/navigator_extension.dart';
 import 'package:events/features/events/cubit/event_cubit.dart';
 import 'package:events/features/events/model/event_model.dart';
 import 'package:events/features/add_new_event/ui/add_event_screen.dart';
@@ -6,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TabsWidget extends StatelessWidget {
   const TabsWidget({this.onNewEventAdded, super.key});
-  final VoidCallback? onNewEventAdded;
+  final void Function(EventModel eventModel)? onNewEventAdded;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,7 @@ class TabsWidget extends StatelessWidget {
               index: 3,
               icon: Icons.add,
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => AddEventScreen(onAdded: onNewEventAdded)));
+                context.navigatorPush(AddEventScreen(onAdded: onNewEventAdded));
               }),
         ],
       ),

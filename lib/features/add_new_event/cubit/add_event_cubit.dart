@@ -70,7 +70,7 @@ class AddEventCubit extends Cubit<AddEventState> {
     emit(EventUpdating(updatedEvent));
   }
 
-  Future<void> postForm({
+  Future<void> submitForm({
     String title = '',
     String description = '',
     bool isEditing = false,
@@ -80,13 +80,19 @@ class AddEventCubit extends Cubit<AddEventState> {
 
       return;
     }
-    emit(EventPosting(stateEvent));
+    final newEvent = stateEvent.copyWith(title: title, desc: description);
+
+    emit(EventPosting(newEvent));
 
     saving = true;
 
     try {
-      final newEvent = stateEvent.copyWith(title: title, desc: description);
-      final postedEvent = await AddEventService().upsert(newEvent);
+      EventModel? postedEvent;
+      if (isEditing) {
+        postedEvent = await AddEventService().update(newEvent);
+      } else {
+        postedEvent = await AddEventService().upsert(newEvent);
+      }
 
       if (postedEvent == null) {
         emit(EventAddingFailed('ثبت برنامه ثبت نشد، دوباره سعی کنید!', stateEvent));
@@ -94,10 +100,10 @@ class AddEventCubit extends Cubit<AddEventState> {
 
         return;
       }
-      emit(EventPostingSuccess(isEditing ? 'برنامه موفقانه ویرایش شد!' : 'برنامه موفقانه اضافه شد!', stateEvent));
+      emit(EventPostingSuccess('برنامه موفقانه اضافه شد!', stateEvent));
     } catch (e) {
       debugPrint('posting data error is: $e');
-      emit(EventAddingFailed('ثبت برنامه ثبت نشد، دوباره سعی کنید!', stateEvent));
+      emit(EventAddingFailed('برنامه ثبت نشد، دوباره سعی کنید!', stateEvent));
     } finally {
       saving = false;
     }
@@ -108,8 +114,4 @@ class AddEventCubit extends Cubit<AddEventState> {
     pickingImage = false;
     emit(EventUpdating(EventModel.empty));
   }
-
-
-
-
 }

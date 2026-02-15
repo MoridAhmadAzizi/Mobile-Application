@@ -54,11 +54,15 @@ class AddEventService {
 
     final user = supabase.auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
-    return _insertRemote(
-      supabase,
-      eventModel,
-    );
-    // return _updateRemote(supabase, eventModel);
+    return _insertRemote(supabase, eventModel);
+  }
+
+  Future<EventModel?> update(EventModel eventModel) async {
+    final supabase = Supabase.instance.client;
+
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+    return _updateRemote(supabase, eventModel);
   }
 
   Future<EventModel?> _insertRemote(SupabaseClient supabaseClient, EventModel eventModel) async {
@@ -92,27 +96,27 @@ class AddEventService {
     }
   }
 
-// Future<EventModel> _updateRemote(
-//   SupabaseClient supabase,
-//   EventModel eventModel,
-// ) async {
-//   final urls = await _uploadImagesIfNeeded(
-//     eventId: eventModel.id,
-//     images: eventModel.imagePaths,
-//   );
-//   final updatedEvent = eventModel.copyWith(imagePaths: urls);
-//   final postedData = await supabase
-//       .from('products')
-//       .update({
-//         'title': updatedEvent.title,
-//         'description': updatedEvent.desc,
-//         'type': updatedEvent.type,
-//         'tools': updatedEvent.tools,
-//         'image_paths': urls,
-//       })
-//       .eq('id', updatedEvent.id)
-//       .select('id,title,description,type,tools,image_paths,created_at,updated_at');
-//   developer.log('postedData is: $postedData} ${updatedEvent.title}');
-//   return updatedEvent;
-// }
+  Future<EventModel> _updateRemote(
+    SupabaseClient supabase,
+    EventModel eventModel,
+  ) async {
+    final urls = await _uploadImagesIfNeeded(
+      eventId: eventModel.id,
+      images: eventModel.imagePaths,
+    );
+    final updatedEvent = eventModel.copyWith(imagePaths: urls);
+    final postedData = await supabase
+        .from('products')
+        .update({
+          'title': updatedEvent.title,
+          'description': updatedEvent.desc,
+          'type': updatedEvent.type,
+          'tools': updatedEvent.tools,
+          'image_paths': urls,
+        })
+        .eq('id', updatedEvent.id)
+        .select('id,title,description,type,tools,image_paths,created_at,updated_at');
+    developer.log('postedData is: $postedData} ${updatedEvent.title}');
+    return updatedEvent;
+  }
 }

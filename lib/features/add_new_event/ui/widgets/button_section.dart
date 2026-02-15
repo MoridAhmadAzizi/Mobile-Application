@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ButtonSection extends StatelessWidget {
-  const ButtonSection({this.isEditing = false, this.onReset, this.onSubmit, this.isPosting = false, super.key});
-  final bool isEditing;
+  const ButtonSection({required this.title , this.onReset, this.onSubmit, this.isPosting = false, super.key});
+  final String title;
   final VoidCallback? onReset;
   final VoidCallback? onSubmit;
   final bool isPosting;
@@ -23,19 +23,20 @@ class ButtonSection extends StatelessWidget {
               child: CircularProgressIndicator(),
             )
           : Row(
+              spacing: 10,
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: isSaving ? null : onReset,
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                      side: BorderSide(color: Colors.grey.shade300),
+                if (onReset != null)
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: onReset,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                        side: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      child: const Text('پاک کردن', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87)),
                     ),
-                    child: const Text('پاک کردن', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87)),
                   ),
-                ),
-                const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
@@ -50,7 +51,7 @@ class ButtonSection extends StatelessWidget {
                       elevation: 0,
                     ),
                     child: Text(
-                      isEditing ? 'آپدیت محصول' : 'افزودن محصول',
+                      title,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                     ),
                   ),
