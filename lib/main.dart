@@ -30,24 +30,15 @@ Future<void> main() async {
   //   EventController(Get.find<ProductRepo>()),
   //   permanent: true,
   // );
-
+  final router = AppRouter().buildRoutes();
   runApp(MultiRepositoryProvider(
       providers: [RepositoryProvider.value(value: databaseRepository), RepositoryProvider.value(value: databaseRepository.getEventRepository())],
-      child: const MyApp()));
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: router(),
-      debugShowCheckedModeBanner: false,
-      title: 'برنامه ها',
-      theme: AppTheme.light(),
-      locale: const Locale('fa', 'IR'),
-      builder: (context, child) => Directionality(textDirection: TextDirection.rtl, child: child ?? const SizedBox()),
-    );
-  }
+      child: MaterialApp.router(
+        routerConfig: router,
+        debugShowCheckedModeBanner: false,
+        title: 'برنامه ها',
+        theme: AppTheme.light(),
+        locale: const Locale('fa', 'IR'),
+        builder: (context, child) => Directionality(textDirection: TextDirection.rtl, child: child ?? const SizedBox()),
+      )));
 }

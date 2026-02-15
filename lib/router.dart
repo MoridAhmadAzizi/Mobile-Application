@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import 'features/events/ui/event_screen.dart';
 
-RouterConfig<Object> router() => GoRouter(
+class AppRouter {
+  RouterConfig<Object> buildRoutes() {
+    return GoRouter(
       routes: [
         GoRoute(
           path: '/',
@@ -11,3 +13,5 @@ RouterConfig<Object> router() => GoRouter(
         ),
       ],
     );
+  }
+}
