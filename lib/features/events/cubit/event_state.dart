@@ -14,3 +14,7 @@ final class EventLoaded extends EventState {
   @override
   List<Object> get props => [events];
 }
+
+final class EventListEmpty extends EventState {
+  EventListEmpty();
+}

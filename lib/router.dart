@@ -9,6 +9,7 @@ class AppRouter {
       routes: [
         GoRoute(
           path: '/',
+          // builder: (context, state) => LoginPage(onTap: () {}),
           builder: (context, state) => const EventScreen(),
         ),
       ],

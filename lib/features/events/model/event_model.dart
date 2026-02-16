@@ -1,5 +1,15 @@
 import 'package:objectbox/objectbox.dart';
 
+enum EventStatus {
+  active('فعال', 0),
+  deActive('غیر فعال', 1),
+  deleted('حذف شده', 2);
+
+  const EventStatus(this.name, this.status);
+  final String name;
+  final int status;
+}
+
 enum EventType {
   kids('نونهالان', 0),
   teens('نوجوانان', 1);
@@ -34,12 +44,14 @@ class EventModel {
   final List<String> imagePaths;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final int status;
 
   EventModel({
     this.id = 0,
     this.title = '',
     this.type = 0,
     this.desc = '',
+    this.status = 0,
     this.tools = const [],
     this.imagePaths = const [],
     this.createdAt,
@@ -53,9 +65,11 @@ class EventModel {
     String? desc,
     int? type,
     List<String>? tools,
+
     List<String>? imagePaths,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? status,
   }) {
     return EventModel(
       id: id ?? this.id,
@@ -66,6 +80,7 @@ class EventModel {
       imagePaths: imagePaths ?? this.imagePaths,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      status: status ?? this.status,
     );
   }
 
@@ -86,6 +101,7 @@ class EventModel {
       imagePaths: List<String>.from(json['image_paths'] ?? const <String>[]),
       createdAt: _parseDate(json['created_at']),
       updatedAt: _parseDate(json['updated_at']),
+      status: (json['status'] ?? 0) as int,
     );
   }
 
@@ -98,6 +114,7 @@ class EventModel {
       'type': type,
       'tools': tools,
       'image_paths': imagePaths,
+      'status': status,
     };
   }
 }

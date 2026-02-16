@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:events/core/providers/local_image_provider.dart';
 import 'package:events/features/events/repository/event_repository.dart';
 import 'package:events/objectbox.g.dart';
 import 'package:path/path.dart';
@@ -7,10 +8,12 @@ import 'package:path_provider/path_provider.dart';
 Store? _databaseStore;
 
 class DatabaseRepository {
-  final Store store;
-  DatabaseRepository._(this.store);
+  DatabaseRepository._(this.store, this.localImageProvider);
 
-  static Future<DatabaseRepository> create() async {
+  final Store store;
+  final LocalImageProvider localImageProvider;
+
+  static Future<DatabaseRepository> create(LocalImageProvider localImageProvider) async {
     final docsDir = await getApplicationDocumentsDirectory();
     final databaseFile = join(docsDir.path, 'repository');
     if (_databaseStore == null) {
@@ -20,12 +23,12 @@ class DatabaseRepository {
         _databaseStore = await openStore(directory: databaseFile);
       }
     }
-    final databaseRepository = DatabaseRepository._(_databaseStore!);
+    final databaseRepository = DatabaseRepository._(_databaseStore!, localImageProvider);
     // databaseRepository.fetchData();
     return databaseRepository;
   }
 
-  EventRepository getEventRepository() => EventRepository(_databaseStore!.box());
+  EventRepository getEventRepository() => EventRepository(_databaseStore!.box(), localImageProvider);
 
   // Stream<List<EventModel>> watchAllProducts() {
   //   final controller = StreamController<List<EventModel>>();

@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:events/core/widgets/cached_image.dart';
 import 'package:events/features/events/cubit/event_cubit.dart';
 import 'package:events/features/events/model/event_model.dart';
 import 'package:events/features/events/repository/event_repository.dart';
@@ -64,6 +63,18 @@ class _EventScreenState extends State<EventScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('صفحه برنامه ها'),
+        actions: [
+          InkWell(
+            onTap: () async {
+              await eventServices.deleteAll();
+              context.read<EventRepository>().deleteAll();
+            },
+            child: Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          )
+        ],
       ),
       body: SafeArea(
         child: BlocProvider(
@@ -95,39 +106,6 @@ class _EventScreenState extends State<EventScreen> {
                     ),
                     const SizedBox(height: 6),
                     const Expanded(child: EventsList()),
-                    // Expanded(
-                    //   child: Obx(() {
-                    //     final list = _applyFilters(pc.products);
-                    //     if (list.isEmpty) {
-                    //       return SingleChildScrollView(
-                    //         scrollDirection: Axis.vertical,
-                    //         child: Center(
-                    //             child: Column(
-                    //           children: [
-                    //             Image.asset(
-                    //               'assets/images/data.png',
-                    //               width: MediaQuery.of(context).size.width,
-                    //               height: 290,
-                    //             ),
-                    //             const Text(
-                    //               'چیزی پیدا نشد ، کلمه دیگری را جستجو کنید!',
-                    //               style: TextStyle(fontSize: 16),
-                    //             )
-                    //           ],
-                    //         )),
-                    //       );
-                    //     }
-                    //     return ListView.separated(
-                    //       padding: const EdgeInsets.all(16),
-                    //       itemCount: list.length,
-                    //       separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    //       itemBuilder: (context, i) {
-                    //         final p = list[i];
-                    //         return _ProductCard(product: p);
-                    //       },
-                    //     );
-                    //   }),
-                    // ),
                   ],
                 );
               },
@@ -145,6 +123,25 @@ class EventsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EventCubit, EventState>(builder: (context, state) {
+      if (state is EventListEmpty) {
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 20,
+            children: [
+              Icon(
+                Icons.do_not_disturb_alt_outlined,
+                color: Colors.grey,
+                size: 100,
+              ),
+              Text(
+                'لیست برنامه ها خالیست!',
+                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w900, fontSize: 16),
+              )
+            ],
+          ),
+        );
+      }
       if (state is EventLoaded) {
         final events = state.events;
 
@@ -167,34 +164,16 @@ class EventCard extends StatelessWidget {
   const EventCard({super.key, required this.eventModel});
   final EventModel eventModel;
 
-  bool _isRemote(String s) => s.startsWith('http://') || s.startsWith('https://');
-
   Widget thumb() {
     final firstImage = eventModel.imagePaths.isEmpty ? '' : eventModel.imagePaths.first;
 
     if (firstImage.isEmpty) {
       return const Icon(Icons.image, color: Colors.grey, size: 40);
     }
-
-    if (firstImage.startsWith('assets/')) {
-      return Image.asset(firstImage, fit: BoxFit.cover);
-    }
-
-    if (_isRemote(firstImage)) {
-      // final cached = pc.cachedBytes(first);
-      // if (cached != null) return Image.memory(cached, fit: BoxFit.cover);
-      return Image.network(firstImage, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image));
-    }
-
-    final normalized = firstImage.startsWith('file://') ? firstImage.replaceFirst('file://', '') : firstImage;
-
-    if (!File(normalized).existsSync()) {
-      // final cached = pc.cachedBytes(first);
-      // if (cached != null) return Image.memory(cached, fit: BoxFit.cover);
-      return const Icon(Icons.broken_image);
-    }
-
-    return Image.file(File(normalized), fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image));
+    return CachedImage(
+      url: firstImage,
+      fit: BoxFit.cover,
+    );
   }
 
   @override
@@ -203,36 +182,44 @@ class EventCard extends StatelessWidget {
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => EventDetailScreen(eventModel: eventModel)));
       },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(border: Border.all(width: 1, color: Theme.of(context).primaryColor), borderRadius: BorderRadius.circular(8)),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(7),
-                child: SizedBox(width: 65, height: 65, child: thumb()),
-              ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.grey.shade400),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                DecoratedBox(
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(width: 1.5, color: Theme.of(context).primaryColor)),
+                  child: Padding(
+                    padding: EdgeInsets.all(1),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(7),
+                      child: SizedBox(width: 65, height: 65, child: thumb()),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(eventModel.title, style: const TextStyle(fontWeight: FontWeight.w900)),
+                      const SizedBox(height: 4),
+                      Text(eventModel.desc.toString(), style: TextStyle(color: Colors.grey.shade700)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(eventModel.title, style: const TextStyle(fontWeight: FontWeight.w900)),
-                  const SizedBox(height: 4),
-                  Text(eventModel.type.toString(), style: TextStyle(color: Colors.grey.shade700)),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_left),
-          ],
+          ),
         ),
       ),
     );

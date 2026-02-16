@@ -14,20 +14,29 @@ class EventCubit extends Cubit<EventState> {
   int selectedTab = -1;
   Future<void> reload() async {
     emit(EventLoading());
+
     final events = await eventServices.reloadEvents();
-    emit(EventLoaded(events));
+    if (events.isNotEmpty) {
+      emit(EventLoaded(events));
+      return;
+    }
+    emit(EventListEmpty());
   }
 
   void onTapChanged(int chantedTab) {
     selectedTab = chantedTab;
-
     if (chantedTab == -1) {
       reload();
       return;
     }
     final dbEvents = eventRepository.getActiveEvents();
-
-    final sortedEvents = dbEvents.where((event) => event.type == selectedTab).toList();
-    emit(EventLoaded(sortedEvents));
+    if (dbEvents.isNotEmpty) {
+      final sortedEvents = dbEvents.where((event) => event.type == selectedTab);
+      if (sortedEvents.isNotEmpty) {
+        emit(EventLoaded(sortedEvents.toList()));
+        return;
+      }
+    }
+    emit(EventListEmpty());
   }
 }

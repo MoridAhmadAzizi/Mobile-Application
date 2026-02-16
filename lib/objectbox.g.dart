@@ -9,7 +9,8 @@
 import 'dart:typed_data';
 
 import 'package:flat_buffers/flat_buffers.dart' as fb;
-import 'package:objectbox/internal.dart' as obx_int; // generated code can access "internal" functionality
+import 'package:objectbox/internal.dart'
+    as obx_int; // generated code can access "internal" functionality
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
@@ -21,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(1, 2006261101140995514),
     name: 'EventModel',
-    lastPropertyId: const obx_int.IdUid(9, 2921592406769504122),
+    lastPropertyId: const obx_int.IdUid(10, 358585546820936239),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -69,6 +70,12 @@ final _entities = <obx_int.ModelEntity>[
       obx_int.ModelProperty(
         id: const obx_int.IdUid(9, 2921592406769504122),
         name: 'type',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(10, 358585546820936239),
+        name: 'status',
         type: 6,
         flags: 0,
       ),
@@ -147,7 +154,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final toolsOffset = fbb.writeList(
           object.tools.map(fbb.writeString).toList(growable: false),
         );
-        fbb.startTable(10);
+        fbb.startTable(11);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, titleOffset);
         fbb.addOffset(3, descOffset);
@@ -156,6 +163,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt64(6, object.createdAt?.millisecondsSinceEpoch);
         fbb.addInt64(7, object.updatedAt?.millisecondsSinceEpoch);
         fbb.addInt64(8, object.type);
+        fbb.addInt64(9, object.status);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -190,6 +198,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final descParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGet(buffer, rootOffset, 10, '');
+        final statusParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          22,
+          0,
+        );
         final toolsParam = const fb.ListReader<String>(
           fb.StringReader(asciiOptimization: true),
           lazy: false,
@@ -198,13 +212,18 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fb.StringReader(asciiOptimization: true),
           lazy: false,
         ).vTableGet(buffer, rootOffset, 12, []);
-        final createdAtParam = createdAtValue == null ? null : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
-        final updatedAtParam = updatedAtValue == null ? null : DateTime.fromMillisecondsSinceEpoch(updatedAtValue);
+        final createdAtParam = createdAtValue == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
+        final updatedAtParam = updatedAtValue == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(updatedAtValue);
         final object = EventModel(
           id: idParam,
           title: titleParam,
           type: typeParam,
           desc: descParam,
+          status: statusParam,
           tools: toolsParam,
           imagePaths: imagePathsParam,
           createdAt: createdAtParam,
@@ -259,5 +278,10 @@ class EventModel_ {
   /// See [EventModel.type].
   static final type = obx.QueryIntegerProperty<EventModel>(
     _entities[0].properties[7],
+  );
+
+  /// See [EventModel.status].
+  static final status = obx.QueryIntegerProperty<EventModel>(
+    _entities[0].properties[8],
   );
 }

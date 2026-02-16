@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:2006261101140995514",
-      "lastPropertyId": "9:2921592406769504122",
+      "lastPropertyId": "10:358585546820936239",
       "name": "EventModel",
       "properties": [
         {
@@ -47,6 +47,11 @@
         {
           "id": "9:2921592406769504122",
           "name": "type",
+          "type": 6
+        },
+        {
+          "id": "10:358585546820936239",
+          "name": "status",
           "type": 6
         }
       ],

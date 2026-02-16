@@ -106,9 +106,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
                             icon: Icons.description_outlined,
                             controller: _descriptionTextController,
                             hint: 'توضیحات محصول (اختیاری)',
-                            maxLines: 1,
+                            height: 250,
                           ),
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 80),
                         ],
                       ),
                     ),
@@ -147,15 +147,16 @@ class _AddEventScreenState extends State<AddEventScreen> {
     required TextEditingController controller,
     required String hint,
     TextInputType? textType,
-    int maxLines = 3,
+    double height = 80,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87)),
         const SizedBox(height: 8),
         SizedBox(
-          height: 200,
+          height: height,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -163,16 +164,14 @@ class _AddEventScreenState extends State<AddEventScreen> {
               border: Border.all(color: Colors.grey[300]!, width: 2),
             ),
             child: TextField(
-              maxLines: textType != null ? null : 1,
-              expands: textType != null,
+              maxLines: textType == TextInputType.multiline ? null : 1,
               controller: controller,
-              keyboardType: textType,
+              keyboardType: textType ?? TextInputType.text,
               decoration: InputDecoration(
                 hintText: hint,
                 prefixIcon: Icon(icon, color: Theme.of(context).primaryColor),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(7), borderSide: BorderSide.none),
-                filled: true,
-                fillColor: Colors.white,
+                filled: false,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
             ),

@@ -8,10 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AddEventService {
   bool _isRemoteUrl(String s) => s.startsWith('http://') || s.startsWith('https://');
 
-  Future<List<String>> _uploadImagesIfNeeded({
-    required int eventId,
-    required List<String> images,
-  }) async {
+  Future<List<String>> _uploadImagesIfNeeded({required int eventId, required List<String> images}) async {
     final supabase = Supabase.instance.client;
 
     final imageUrls = <String>[];
@@ -20,7 +17,6 @@ class AddEventService {
     for (var i = 0; i < images.length; i++) {
       final img = images[i];
       if (img.isEmpty) continue;
-      if (img.startsWith('assets/')) continue;
       if (_isRemoteUrl(img)) {
         imageUrls.add(img);
         continue;
@@ -28,7 +24,7 @@ class AddEventService {
 
       final normalized = img.startsWith('file://') ? img.replaceFirst('file://', '') : img;
       if (!File(normalized).existsSync()) continue;
-
+    developer.log('caching uploadingImage path: $img');
       final bytes = await ImageUtils.compressToJpegBytes(normalized);
       final path = '${eventId}_${DateTime.now().millisecondsSinceEpoch}_$i.jpeg';
 
@@ -78,6 +74,7 @@ class AddEventService {
             'title': eventModel.title,
             'description': eventModel.desc,
             'type': eventModel.type,
+            'status': eventModel.status,
             'tools': eventModel.tools,
             'image_paths': urls,
           })
@@ -112,6 +109,7 @@ class AddEventService {
           'description': updatedEvent.desc,
           'type': updatedEvent.type,
           'tools': updatedEvent.tools,
+          'status': updatedEvent.status,
           'image_paths': urls,
         })
         .eq('id', updatedEvent.id)

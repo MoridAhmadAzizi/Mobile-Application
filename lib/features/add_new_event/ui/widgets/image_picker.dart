@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:events/core/widgets/cached_image.dart';
 import 'package:events/features/add_new_event/cubit/add_event_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,34 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ImagePickerWidget extends StatelessWidget {
   const ImagePickerWidget(this.imagePaths, {super.key});
   final List<String> imagePaths;
-
-  bool _isRemote(String s) => s.startsWith('http://') || s.startsWith('https://');
-
-  Widget _buildImageThumb(String path) {
-    if (path.startsWith('assets/')) {
-      return Image.asset(path, fit: BoxFit.cover);
-    }
-
-    if (_isRemote(path)) {
-      return Image.network(
-        path,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
-      );
-    }
-
-    final normalized = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
-
-    if (!File(normalized).existsSync()) {
-      return const Icon(Icons.broken_image);
-    }
-
-    return Image.file(
-      File(normalized),
-      fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,24 +83,26 @@ class ImagePickerWidget extends StatelessWidget {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: Container(
+                            child: ColoredBox(
                               color: Colors.grey.shade100,
-                              child: SizedBox.expand(child: _buildImageThumb(path)),
+                              child: SizedBox.expand(
+                                  child: CachedImage(
+                                url: path,
+                                fit: BoxFit.cover,
+                              )),
                             ),
                           ),
                           Positioned(
                             top: -10,
                             right: -10,
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () => addEventCubit.removeImageFroList(index),
-                                borderRadius: BorderRadius.circular(999),
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(color: Colors.black.withAlpha(150), shape: BoxShape.circle),
-                                  child: const Icon(Icons.close, size: 16, color: Colors.white),
-                                ),
+                            child: InkWell(
+                              onTap: () => addEventCubit.removeImageFroList(index),
+                              borderRadius: BorderRadius.circular(999),
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: DecoratedBox(
+                                    decoration: BoxDecoration(color: Colors.black.withAlpha(150), shape: BoxShape.circle),
+                                    child: const Icon(Icons.close, size: 16, color: Colors.white)),
                               ),
                             ),
                           ),
